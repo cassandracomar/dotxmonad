@@ -4,25 +4,38 @@
  
 import System.IO
 import System.Exit
-import XMonad
+import XMonad                   hiding ( (|||) )
 import XMonad.Hooks.DynamicLog
+import XMonad.Util.Loggers
 import XMonad.Hooks.ManageDocks
 import XMonad.Hooks.SetWMName
 import XMonad.Layout.NoBorders
 import XMonad.Layout.Spiral
 import XMonad.Layout.Tabbed
 import XMonad.Layout.ThreeColumns
+import XMonad.Layout.TwoPane
 import XMonad.Util.Run(spawnPipe)
 import XMonad.Util.EZConfig(additionalKeys)
+import XMonad.Config.Xfce
+import XMonad.Config.Gnome
 import XMonad.Hooks.ManageHelpers
+import XMonad.Layout.LayoutCombinators
+import XMonad.Layout.LayoutScreens
+import XMonad.Layout.Combo
+import XMonad.Layout.WindowNavigation
 
 import qualified XMonad.StackSet as W
 import qualified Data.Map        as M
+
+import Control.OldException
+import DBus
+import DBus.Connection
+import DBus.Message
  
 -- The preferred terminal program, which is used in a binding below and by
 -- certain contrib modules.
 --
-myTerminal      = "gnome-terminal"
+myTerminal      = "terminal"
  
 -- Width of the window border in pixels.
 --
@@ -59,7 +72,7 @@ myNumlockMask   = mod2Mask
 --
 -- > workspaces = ["web", "irc", "code" ] ++ map show [4..9]
 --
-myWorkspaces    = ["1:code","2:web","3:msg","4:terms","5:media","6:docs","7","8","9"]
+myWorkspaces    = ["1:code","2:web","3:msg","4:terms","5:media","6:docs","7:textbooks","8:overflow","9:misc"]
  
 -- Border colors for unfocused and focused windows, respectively.
 --
@@ -74,12 +87,15 @@ myKeys conf@(XConfig {XMonad.modMask = modMask}) = M.fromList $
  
     -- launch a terminal
     [ ((modMask .|. shiftMask, xK_Return), spawn $ XMonad.terminal conf)
+    
+    -- launch file browser
+    , ((modMask .|. controlMask, xK_Return), spawn "thunar")
 
     -- launch gmrun
     , ((modMask .|. controlMask, xK_l     ), spawn "xscreensaver-command -lock")
 
     -- launch dmenu
-    , ((modMask,               xK_p     ), spawn "exe=`dmenu_path | ~/bin/dmenu` && eval \"exec $exe\"")
+    , ((modMask,               xK_p     ), spawn "dmenu_run")
  
     -- launch gmrun
     , ((modMask .|. shiftMask, xK_p     ), spawn "gmrun")
@@ -134,6 +150,15 @@ myKeys conf@(XConfig {XMonad.modMask = modMask}) = M.fromList $
  
     -- toggle the status bar gap
     -- TODO, update this binding with avoidStruts , ((modMask              , xK_b     ),
+    , ((modMask .|. controlMask, xK_f   ), sendMessage $ JumpToLayout "Full")
+    , ((modMask .|. controlMask, xK_t   ), sendMessage $ JumpToLayout "ThreeCol")
+    , ((modMask .|. controlMask, xK_b   ), sendMessage $ JumpToLayout "Tabbed Simplest")
+    , ((modMask .|. controlMask, xK_Up), sendMessage $ Move U)
+    , ((modMask .|. controlMask, xK_Down), sendMessage $ Move D)
+    , ((modMask .|. controlMask, xK_Right), sendMessage $ Move R)
+    , ((modMask .|. controlMask, xK_Left), sendMessage $ Move L)
+    , ((modMask .|. controlMask, xK_space), layoutScreens 2 (TwoPane 0.5 0.5))
+    , ((modMask .|. controlMask .|. shiftMask, xK_space), rescreen)
  
     -- Quit xmonad
     , ((modMask .|. shiftMask, xK_q     ), io (exitWith ExitSuccess))
@@ -157,7 +182,7 @@ myKeys conf@(XConfig {XMonad.modMask = modMask}) = M.fromList $
     -- mod-shift-{w,e,r}, Move client to screen 1, 2, or 3
     --
     [((m .|. modMask, key), screenWorkspace sc >>= flip whenJust (windows . f))
-        | (key, sc) <- zip [xK_w, xK_e, xK_r] [0..]
+        | (key, sc) <- zip [xK_e, xK_w, xK_r] [0..]
         , (f, m) <- [(W.view, 0), (W.shift, shiftMask)]]
  
  
@@ -195,16 +220,18 @@ myTabConfig = defaultTheme {   activeBorderColor = "#7C7C7C"
                              , inactiveBorderColor = "#7C7C7C"
                              , inactiveTextColor = "#EEEEEE"
                              , inactiveColor = "#000000" }
-myLayout = avoidStruts (tiled ||| Mirror tiled ||| tabbed shrinkText myTabConfig ||| Full ||| spiral (6/7) ||| ThreeColMid 1 (3/100) (1/2))
+myLayout = (avoidStruts . windowNavigation) (tiled ||| Mirror tiled ||| tabbed shrinkText myTabConfig ||| Full ||| spiral (6/7) ||| ThreeColMid 1 (3/100) (1/2) ||| (tabbed shrinkText myTabConfig  **|*** Mirror tiled2))
   where
      -- default tiling algorithm partitions the screen into two panes
      tiled   = Tall nmaster delta ratio
+     tiled2  = Tall nmaster delta ratio2
  
      -- The default number of windows in the master pane
      nmaster = 1
  
      -- Default proportion of screen occupied by master pane
      ratio   = 1/2
+     ratio2  = 7/8
  
      -- Percent of screen to increment by when resizing panes
      delta   = 3/100
@@ -229,19 +256,30 @@ myManageHook = composeAll
     , className =? "Smplayer"       --> doFloat
     , className =? "Psx.real"       --> doFloat
     , className =? "Gimp"           --> doFloat
-    , className =? "Galculator"     --> doFloat
+    , className =? "Kcalc"          --> doFloat
     , resource  =? "Komodo_find2"   --> doFloat
     , resource  =? "compose"        --> doFloat
-    , className =? "Terminal"       --> doShift "1:code"
+    , className =? "Plasma"         --> doFloat
+    , className =? "Update"         --> doFloat
+    , className =? "Xfce4-mixer"    --> doFloat
+    , className =? "Xfce4-settings-manager" --> doFloat
+    , className =? "Xfce4*"         --> doFloat
+    , title     =? "Downloads"      --> doFloat
+    , title     =? "About Aurora"   --> doFloat
+    , title     =? "./assignment3"  --> doFloat
+    , className =? "Thunar"         --> doFloat
+    , className =? "Terminal"       --> doShift "4:terms"
     , className =? "Gedit"          --> doShift "1:code"
     , className =? "Emacs"          --> doShift "1:code"
     , className =? "Komodo Edit"    --> doShift "1:code"
     , className =? "Emacs"          --> doShift "1:code"
-    , className =? "firefox-4.0-bin"    --> doShift "2:web"
+    , className =? "Gvim"           --> doShift "1:code"
+    , className =? "Aurora"         --> doShift "2:web"
     , className =? "Thunderbird-bin" --> doShift "3:msg"
     , className =? "Pidgin"         --> doShift "3:msg"
-    , className =? "VirtualBox"     --> doShift "4:vm"
+    , className =? "VirtualBox"     --> doShift "9:misc"
     , className =? "banshee-1"      --> doShift "5:media"
+    , className =? "spotify"        --> doShift "5:media"
     , className =? "Ktorrent"       --> doShift "5:media"
     , className =? "Xchat"          --> doShift "5:media"
     , resource  =? "desktop_window" --> doIgnore
@@ -252,7 +290,54 @@ myManageHook = composeAll
 myFocusFollowsMouse :: Bool
 myFocusFollowsMouse = True
  
- 
+
+prettyPrinter :: Connection -> PP
+prettyPrinter dbus = defaultPP { 
+    ppOutput = dbusOutput dbus
+    , ppTitle = pangoColor "green" . pangoSanitize
+    , ppCurrent = pangoColor "green" . wrap "[" "]" . pangoSanitize
+    , ppVisible = pangoColor "yellow" . wrap "(" ")" . pangoSanitize
+    , ppHidden = pangoColor "orange" . pangoSanitize
+    --pangoColor "white" . wrap "{" "}" . pangoSanitize
+    , ppHiddenNoWindows = pangoSanitize
+    , ppUrgent = pangoColor "red"
+    , ppLayout = pangoColor "green" 
+    , ppOrder = \(ws:l:t:r) -> [t, ws, l] ++ r
+    , ppExtras = [ date "%A %b %e" ]
+    , ppSep = " | "
+}
+
+getWellKnownName :: Connection -> IO ()
+getWellKnownName dbus = tryGetName `catchDyn` (\(DBus.Error _ _) -> getWellKnownName dbus)
+  where
+    tryGetName = do
+        namereq <- newMethodCall serviceDBus pathDBus interfaceDBus "RequestName"
+        addArgs namereq [String "org.xmonad.Log", Word32 5]
+        sendWithReplyAndBlock dbus namereq 0
+        return ()
+
+dbusOutput :: Connection -> String -> IO ()
+dbusOutput dbus str = do
+    msg <- newSignal "/org/xmonad/Log" "org.xmonad.Log" "Update"
+    addArgs msg [String ("<b>" ++ str ++ "</b>")]
+    -- If the send fails, ignore it.
+    send dbus msg 0 `catchDyn` (\(DBus.Error _ _) -> return 0)
+    return ()
+
+pangoColor :: String -> String -> String
+pangoColor fg = wrap left right
+  where
+    left = "<span foreground=\"" ++ fg ++ "\">"
+    right = "</span>"
+
+pangoSanitize :: String -> String
+pangoSanitize = foldr sanitize ""
+  where
+    sanitize '>' xs = "&gt;" ++ xs
+    sanitize '<' xs = "&lt;" ++ xs
+    sanitize '\"' xs = "&quot;" ++ xs
+    sanitize '&' xs = "&amp;" ++ xs
+    sanitize x xs = x:xs 
 ------------------------------------------------------------------------
 -- Status bars and logging
  
@@ -279,18 +364,25 @@ myStartupHook = return ()
  
 -- Run xmonad with the settings you specify. No need to modify this.
 --
-main = do
-        xmproc <- spawnPipe "/usr/bin/xmobar ~/.xmonad/xmobar"
+main :: IO ()
+main = withConnection Session $ \dbus -> do
+--        xmproc <- spawnPipe "/usr/bin/xmobar ~/.xmonad/xmobar"
+        getWellKnownName dbus
         xmonad $ defaults {
-                logHook            = dynamicLogWithPP $ xmobarPP {
-                                ppOutput = hPutStrLn xmproc
-                                , ppTitle = xmobarColor "#FFB6B0" "" . shorten 100
-                                , ppCurrent = xmobarColor "#CEFFAC" ""
-                                , ppSep = "   "
-                                }
-                , manageHook = manageDocks <+> myManageHook
-                , startupHook = setWMName "LG3D"
+            logHook = dynamicLogWithPP (prettyPrinter dbus),
+            startupHook = setWMName "LG3D"
+
         }
+--        {
+--                logHook = dynamicLogWithPP $ xmobarPP {
+--                                ppOutput = hPutStrLn xmproc
+--                                , ppTitle = xmobarColor "#FFB6B0" "" . shorten 100
+--                                , ppCurrent = xmobarColor "#CEFFAC" ""
+--                                , ppSep = "   "
+--                          }
+--                , manageHook = manageDocks <+> myManageHook
+--                , startupHook = setWMName "LG3D"
+--        }
 
 -- A structure containing your configuration settings, overriding
 -- fields in the default config. Any you don't override, will 
@@ -298,7 +390,7 @@ main = do
 -- 
 -- No need to modify this.
 --
-defaults = defaultConfig {
+defaults = xfceConfig {
       -- simple stuff
         terminal           = myTerminal,
         focusFollowsMouse  = myFocusFollowsMouse,
@@ -315,8 +407,8 @@ defaults = defaultConfig {
  
       -- hooks, layouts
         layoutHook         = smartBorders $ myLayout,
-        manageHook         = myManageHook ,
-        startupHook        = myStartupHook  
+        manageHook         = manageDocks <+> myManageHook ,
+        startupHook        = myStartupHook 
     }
 
 ------------------------------------------------------------------------
