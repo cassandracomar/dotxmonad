@@ -4,17 +4,18 @@
  
 import System.IO
 import System.Exit
-import XMonad                   hiding ( (|||) )
+import XMonad                   hiding ( (|||), Connection )
 import XMonad.Hooks.DynamicLog
 import XMonad.Util.Loggers
 import XMonad.Hooks.ManageDocks
 import XMonad.Hooks.SetWMName
+import XMonad.Hooks.InsertPosition
 import XMonad.Layout.NoBorders
 import XMonad.Layout.Spiral
 import XMonad.Layout.Tabbed
 import XMonad.Layout.ThreeColumns
 import XMonad.Layout.TwoPane
-import XMonad.Util.Run(spawnPipe)
+import XMonad.Util.Run(spawnPipe, safeSpawnProg)
 import XMonad.Util.EZConfig(additionalKeys)
 import XMonad.Config.Xfce
 import XMonad.Config.Gnome
@@ -35,7 +36,7 @@ import DBus.Message
 -- The preferred terminal program, which is used in a binding below and by
 -- certain contrib modules.
 --
-myTerminal      = "terminal"
+myTerminal      = "urxvt"
  
 -- Width of the window border in pixels.
 --
@@ -47,21 +48,6 @@ myBorderWidth   = 1
 -- "windows key" is usually mod4Mask.
 --
 myModMask       = mod1Mask
- 
--- The mask for the numlock key. Numlock status is "masked" from the
--- current modifier status, so the keybindings will work with numlock on or
--- off. You may need to change this on some systems.
---
--- You can find the numlock modifier by running "xmodmap" and looking for a
--- modifier with Num_Lock bound to it:
---
--- > $ xmodmap | grep Num
--- > mod2        Num_Lock (0x4d)
---
--- Set numlockMask = 0 if you don't have a numlock key, or want to treat
--- numlock status separately.
---
-myNumlockMask   = mod2Mask
  
 -- The default number of workspaces (virtual screens) and their names.
 -- By default we use numeric strings, but any string may be used as a
@@ -159,6 +145,8 @@ myKeys conf@(XConfig {XMonad.modMask = modMask}) = M.fromList $
     , ((modMask .|. controlMask, xK_Left), sendMessage $ Move L)
     , ((modMask .|. controlMask, xK_space), layoutScreens 2 (TwoPane 0.5 0.5))
     , ((modMask .|. controlMask .|. shiftMask, xK_space), rescreen)
+    , ((modMask, xK_d)                                  , safeSpawnProg "/home/arjun/bin/dock.sh"  )
+    , ((modMask .|. shiftMask, xK_d)                    , safeSpawnProg "/home/arjun/bin/undock.sh")
  
     -- Quit xmonad
     , ((modMask .|. shiftMask, xK_q     ), io (exitWith ExitSuccess))
@@ -266,7 +254,6 @@ myManageHook = composeAll
     , className =? "Xfce4*"         --> doFloat
     , title     =? "Downloads"      --> doFloat
     , title     =? "About Aurora"   --> doFloat
-    , title     =? "./assignment3"  --> doFloat
     , className =? "Thunar"         --> doFloat
     , className =? "Terminal"       --> doShift "4:terms"
     , className =? "Gedit"          --> doShift "1:code"
@@ -284,7 +271,7 @@ myManageHook = composeAll
     , className =? "Xchat"          --> doShift "5:media"
     , resource  =? "desktop_window" --> doIgnore
     , resource  =? "kdesktop"       --> doIgnore 
-    , isFullscreen --> (doF W.focusDown <+> doFullFloat)]
+    , isFullscreen --> (doF W.focusDown <+> doFullFloat) ] 
  
 -- Whether focus follows the mouse pointer.
 myFocusFollowsMouse :: Bool
@@ -374,7 +361,8 @@ main = withConnection Session $ \dbus -> do
 
         }
 --        {
---                logHook = dynamicLogWithPP $ xmobarPP {
+--                logHook =udo pm-suspend
+--                dynamicLogWithPP $ xmobarPP {
 --                                ppOutput = hPutStrLn xmproc
 --                                , ppTitle = xmobarColor "#FFB6B0" "" . shorten 100
 --                                , ppCurrent = xmobarColor "#CEFFAC" ""
@@ -396,7 +384,6 @@ defaults = xfceConfig {
         focusFollowsMouse  = myFocusFollowsMouse,
         borderWidth        = myBorderWidth,
         modMask            = myModMask,
-        numlockMask        = myNumlockMask,
         workspaces         = myWorkspaces,
         normalBorderColor  = myNormalBorderColor,
         focusedBorderColor = myFocusedBorderColor,
@@ -407,7 +394,7 @@ defaults = xfceConfig {
  
       -- hooks, layouts
         layoutHook         = smartBorders $ myLayout,
-        manageHook         = manageDocks <+> myManageHook ,
+        manageHook         = manageDocks <+> insertPosition Above Newer <+> myManageHook ,
         startupHook        = myStartupHook 
     }
 
