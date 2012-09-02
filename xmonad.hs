@@ -58,7 +58,7 @@ myModMask       = mod1Mask
 --
 -- > workspaces = ["web", "irc", "code" ] ++ map show [4..9]
 --
-myWorkspaces    = ["1:code","2:web","3:msg","4:terms","5:media","6:docs","7:textbooks","8:overflow","9:misc"]
+myWorkspaces    = ["1:code","2:web","3:msg","4:terms","5:media","6:docs","7:textbooks","8:overflow","9:misc", ""]
  
 -- Border colors for unfocused and focused windows, respectively.
 --
@@ -143,11 +143,14 @@ myKeys conf@(XConfig {XMonad.modMask = modMask}) = M.fromList $
     , ((modMask .|. controlMask, xK_Down), sendMessage $ Move D)
     , ((modMask .|. controlMask, xK_Right), sendMessage $ Move R)
     , ((modMask .|. controlMask, xK_Left), sendMessage $ Move L)
-    , ((modMask .|. controlMask, xK_space), layoutScreens 2 (TwoPane 0.5 0.5))
+    , ((modMask .|. controlMask, xK_space), layoutSplitScreen 2 (TwoPane 0.80 0.20))
     , ((modMask .|. controlMask .|. shiftMask, xK_space), rescreen)
     , ((modMask, xK_d)                                  , safeSpawnProg "/home/arjun/bin/dock.sh"  )
     , ((modMask .|. shiftMask, xK_d)                    , safeSpawnProg "/home/arjun/bin/undock.sh")
+    , ((modMask .|. shiftMask, xK_b), sendMessage ToggleStruts)
  
+    , ((controlMask, xK_Up), spawn "amixer -q set Master 1+ unmute")
+    , ((controlMask, xK_Down), spawn "amixer -q set Master 1- unmute")
     -- Quit xmonad
     , ((modMask .|. shiftMask, xK_q     ), io (exitWith ExitSuccess))
  
@@ -161,7 +164,7 @@ myKeys conf@(XConfig {XMonad.modMask = modMask}) = M.fromList $
     -- mod-shift-[1..9], Move client to workspace N
     --
     [((m .|. modMask, k), windows $ f i)
-        | (i, k) <- zip (XMonad.workspaces conf) [xK_1 .. xK_9]
+        | (i, k) <- zip (XMonad.workspaces conf) ([xK_1 .. xK_9] ++ [xK_0])
         , (f, m) <- [(W.greedyView, 0), (W.shift, shiftMask)]]
     ++
  
@@ -170,7 +173,7 @@ myKeys conf@(XConfig {XMonad.modMask = modMask}) = M.fromList $
     -- mod-shift-{w,e,r}, Move client to screen 1, 2, or 3
     --
     [((m .|. modMask, key), screenWorkspace sc >>= flip whenJust (windows . f))
-        | (key, sc) <- zip [xK_e, xK_w, xK_r] [0..]
+        | (key, sc) <- zip [xK_e, xK_r, xK_w] [0..]
         , (f, m) <- [(W.view, 0), (W.shift, shiftMask)]]
  
  
@@ -393,7 +396,7 @@ defaults = xfceConfig {
         mouseBindings      = myMouseBindings,
  
       -- hooks, layouts
-        layoutHook         = smartBorders $ myLayout,
+        layoutHook         = avoidStruts . smartBorders $ myLayout,
         manageHook         = manageDocks <+> insertPosition Above Newer <+> myManageHook ,
         startupHook        = myStartupHook 
     }
