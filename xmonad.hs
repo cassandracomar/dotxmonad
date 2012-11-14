@@ -10,6 +10,7 @@ import XMonad.Util.Loggers
 import XMonad.Hooks.ManageDocks
 import XMonad.Hooks.SetWMName
 import XMonad.Hooks.InsertPosition
+import XMonad.Hooks.FadeInactive
 import XMonad.Layout.NoBorders
 import XMonad.Layout.Spiral
 import XMonad.Layout.Tabbed
@@ -22,6 +23,7 @@ import XMonad.Layout.LayoutCombinators
 import XMonad.Layout.LayoutScreens
 import XMonad.Layout.WindowNavigation
 import System.Dzen.Padding
+import System.Dzen.Base
 
 import qualified XMonad.StackSet as W
 import qualified Data.Map        as M
@@ -176,13 +178,13 @@ myKeys conf@(XConfig {XMonad.modMask = modMask}) = M.fromList $
 myMouseBindings (XConfig {XMonad.modMask = modMask}) = M.fromList
  
     -- mod-button1, Set the window to floating mode and move by dragging
-    [ (modMask, button1), \w -> focus w >> mouseMoveWindow w
+    [ ((modMask, button1), \w -> focus w >> mouseMoveWindow w)
  
     -- mod-button2, Raise the window to the top of the stack
-    , (modMask, button2), \w -> focus w >> windows W.swapMaster
+    , ((modMask, button2), \w -> focus w >> windows W.swapMaster)
  
     -- mod-button3, Set the window to floating mode and resize by dragging
-    , (modMask, button3), \w -> focus w >> mouseResizeWindow w
+    , ((modMask, button3), \w -> focus w >> mouseResizeWindow w)
  
     -- you may also bind events to the mouse scroll wheel (button4 and button5)
     ]
@@ -279,7 +281,7 @@ myFocusFollowsMouse = True
 prettyPrinter :: Handle -> PP
 prettyPrinter h = defaultPP { 
     ppOutput = hPutStrLn h
-    , ppTitle = dzenColor "green" "black" . padR 80 
+    , ppTitle = dzenColor "green" "black" . toString . padR 80 . str
     , ppCurrent = dzenColor "green" "black" . wrap "[" "]" 
     , ppVisible = dzenColor "yellow" "black" . wrap "(" ")" 
     , ppHidden = dzenColor "orange" "black"
@@ -302,7 +304,7 @@ prettyPrinter h = defaultPP {
 --
 -- > logHook = dynamicLogDzen
 --
-myLogHook = dynamicLogWithPP . prettyPrinter
+myLogHook h = dynamicLogWithPP $ prettyPrinter h
  
 ------------------------------------------------------------------------
 -- Startup hook
@@ -318,12 +320,14 @@ myStartupHook = return ()
 -- Now run xmonad with all the defaults we set up.
  
 -- Run xmonad with the settings you specify. No need to modify this.
---
+
+myStatusBar = "dzen2 -x '0' -y '0' -h '24' -w 3840 -ta '1' -fg '#FFFFFF' -bg '#1B1D1E'"
 main :: IO ()
 main = do 
-          print "Running XMonad."
+          dzenStatusBar <- spawnPipe myStatusBar
           xmonad $ defaults {
-            startupHook = setWMName "LG3D"
+              startupHook = setWMName "LG3D"
+            , logHook = myLogHook dzenStatusBar >> fadeInactiveLogHook 0xdddddddd
           }
 
 -- A structure containing your configuration settings, overriding
@@ -347,8 +351,7 @@ defaults = xfceConfig {
       -- hooks, layouts
         layoutHook         = avoidStruts . smartBorders $ myLayout,
         manageHook         = manageDocks <+> insertPosition Above Newer <+> myManageHook ,
-        startupHook        = myStartupHook, 
-        logHook            = myLogHook
+        startupHook        = myStartupHook 
     }
 
 ------------------------------------------------------------------------
