@@ -16,23 +16,16 @@ import XMonad.Layout.Tabbed
 import XMonad.Layout.ThreeColumns
 import XMonad.Layout.TwoPane
 import XMonad.Util.Run(spawnPipe, safeSpawnProg)
-import XMonad.Util.EZConfig(additionalKeys)
 import XMonad.Config.Xfce
-import XMonad.Config.Gnome
 import XMonad.Hooks.ManageHelpers
 import XMonad.Layout.LayoutCombinators
 import XMonad.Layout.LayoutScreens
-import XMonad.Layout.Combo
 import XMonad.Layout.WindowNavigation
+import System.Dzen.Padding
 
 import qualified XMonad.StackSet as W
 import qualified Data.Map        as M
 
-import Control.OldException
-import DBus
-import DBus.Connection
-import DBus.Message
- 
 -- The preferred terminal program, which is used in a binding below and by
 -- certain contrib modules.
 --
@@ -143,7 +136,7 @@ myKeys conf@(XConfig {XMonad.modMask = modMask}) = M.fromList $
     , ((modMask .|. controlMask, xK_Down), sendMessage $ Move D)
     , ((modMask .|. controlMask, xK_Right), sendMessage $ Move R)
     , ((modMask .|. controlMask, xK_Left), sendMessage $ Move L)
-    , ((modMask .|. controlMask, xK_space), layoutSplitScreen 2 (TwoPane 0.80 0.20))
+    , ((modMask .|. controlMask, xK_space), layoutSplitScreen 2 (TwoPane 0.8 0.2))
     , ((modMask .|. controlMask .|. shiftMask, xK_space), rescreen)
     , ((modMask, xK_d)                                  , safeSpawnProg "/home/arjun/bin/dock.sh"  )
     , ((modMask .|. shiftMask, xK_d)                    , safeSpawnProg "/home/arjun/bin/undock.sh")
@@ -152,7 +145,7 @@ myKeys conf@(XConfig {XMonad.modMask = modMask}) = M.fromList $
     , ((controlMask, xK_Up), spawn "amixer -q set Master 1+ unmute")
     , ((controlMask, xK_Down), spawn "amixer -q set Master 1- unmute")
     -- Quit xmonad
-    , ((modMask .|. shiftMask, xK_q     ), io (exitWith ExitSuccess))
+    , ((modMask .|. shiftMask, xK_q     ), io exitSuccess)
  
     -- Restart xmonad
     , ((modMask              , xK_q     ), restart "xmonad" True)
@@ -180,16 +173,16 @@ myKeys conf@(XConfig {XMonad.modMask = modMask}) = M.fromList $
 ------------------------------------------------------------------------
 -- Mouse bindings: default actions bound to mouse events
 --
-myMouseBindings (XConfig {XMonad.modMask = modMask}) = M.fromList $
+myMouseBindings (XConfig {XMonad.modMask = modMask}) = M.fromList
  
     -- mod-button1, Set the window to floating mode and move by dragging
-    [ ((modMask, button1), (\w -> focus w >> mouseMoveWindow w))
+    [ (modMask, button1), \w -> focus w >> mouseMoveWindow w
  
     -- mod-button2, Raise the window to the top of the stack
-    , ((modMask, button2), (\w -> focus w >> windows W.swapMaster))
+    , (modMask, button2), \w -> focus w >> windows W.swapMaster
  
     -- mod-button3, Set the window to floating mode and resize by dragging
-    , ((modMask, button3), (\w -> focus w >> mouseResizeWindow w))
+    , (modMask, button3), \w -> focus w >> mouseResizeWindow w
  
     -- you may also bind events to the mouse scroll wheel (button4 and button5)
     ]
@@ -274,60 +267,31 @@ myManageHook = composeAll
     , className =? "Xchat"          --> doShift "5:media"
     , resource  =? "desktop_window" --> doIgnore
     , resource  =? "kdesktop"       --> doIgnore 
-    , isFullscreen --> (doF W.focusDown <+> doFullFloat) ] 
+    , resource  =? "steam"          --> doIgnore
+    , isFullscreen                  --> (doF W.focusDown <+> doFullFloat) 
+    ] 
  
 -- Whether focus follows the mouse pointer.
 myFocusFollowsMouse :: Bool
 myFocusFollowsMouse = True
  
 
-prettyPrinter :: Connection -> PP
-prettyPrinter dbus = defaultPP { 
-    ppOutput = dbusOutput dbus
-    , ppTitle = pangoColor "green" . pangoSanitize . (\xs -> xs ++ replicate (85 - length xs) ' ') . shorten 85
-    , ppCurrent = pangoColor "green" . wrap "[" "]" . pangoSanitize
-    , ppVisible = pangoColor "yellow" . wrap "(" ")" . pangoSanitize
-    , ppHidden = pangoColor "orange" . pangoSanitize
-    --pangoColor "white" . wrap "{" "}" . pangoSanitize
-    , ppHiddenNoWindows = pangoSanitize
-    , ppUrgent = pangoColor "red"
-    , ppLayout = pangoColor "green" 
+prettyPrinter :: Handle -> PP
+prettyPrinter h = defaultPP { 
+    ppOutput = hPutStrLn h
+    , ppTitle = dzenColor "green" "black" . padR 80 
+    , ppCurrent = dzenColor "green" "black" . wrap "[" "]" 
+    , ppVisible = dzenColor "yellow" "black" . wrap "(" ")" 
+    , ppHidden = dzenColor "orange" "black"
+    , ppHiddenNoWindows = dzenColor "white" "black"
+    , ppUrgent = dzenColor "red" "black"
+    , ppLayout = dzenColor "green" "black"
     , ppOrder = \(ws:l:t:r) -> [t, ws, l] ++ r
     , ppExtras = [ date "%A %b %e" ]
     , ppSep = " | "
 }
 
-getWellKnownName :: Connection -> IO ()
-getWellKnownName dbus = tryGetName `catchDyn` (\(DBus.Error _ _) -> getWellKnownName dbus)
-  where
-    tryGetName = do
-        namereq <- newMethodCall serviceDBus pathDBus interfaceDBus "RequestName"
-        addArgs namereq [String "org.xmonad.Log", Word32 5]
-        sendWithReplyAndBlock dbus namereq 0
-        return ()
 
-dbusOutput :: Connection -> String -> IO ()
-dbusOutput dbus str = do
-    msg <- newSignal "/org/xmonad/Log" "org.xmonad.Log" "Update"
-    addArgs msg [String ("<b>" ++ str ++ "</b>")]
-    -- If the send fails, ignore it.
-    send dbus msg 0 `catchDyn` (\(DBus.Error _ _) -> return 0)
-    return ()
-
-pangoColor :: String -> String -> String
-pangoColor fg = wrap left right
-  where
-    left = "<span foreground=\"" ++ fg ++ "\">"
-    right = "</span>"
-
-pangoSanitize :: String -> String
-pangoSanitize = foldr sanitize ""
-  where
-    sanitize '>' xs = "&gt;" ++ xs
-    sanitize '<' xs = "&lt;" ++ xs
-    sanitize '\"' xs = "&quot;" ++ xs
-    sanitize '&' xs = "&amp;" ++ xs
-    sanitize x xs = x:xs 
 ------------------------------------------------------------------------
 -- Status bars and logging
  
@@ -338,6 +302,7 @@ pangoSanitize = foldr sanitize ""
 --
 -- > logHook = dynamicLogDzen
 --
+myLogHook = dynamicLogWithPP . prettyPrinter
  
 ------------------------------------------------------------------------
 -- Startup hook
@@ -355,32 +320,16 @@ myStartupHook = return ()
 -- Run xmonad with the settings you specify. No need to modify this.
 --
 main :: IO ()
-main = withConnection Session $ \dbus -> do
---        xmproc <- spawnPipe "/usr/bin/xmobar ~/.xmonad/xmobar"
-        getWellKnownName dbus
-        xmonad $ defaults {
-            logHook = dynamicLogWithPP (prettyPrinter dbus),
+main = do 
+          print "Running XMonad."
+          xmonad $ defaults {
             startupHook = setWMName "LG3D"
-
-        }
---        {
---                logHook =udo pm-suspend
---                dynamicLogWithPP $ xmobarPP {
---                                ppOutput = hPutStrLn xmproc
---                                , ppTitle = xmobarColor "#FFB6B0" "" . shorten 100
---                                , ppCurrent = xmobarColor "#CEFFAC" ""
---                                , ppSep = "   "
---                          }
---                , manageHook = manageDocks <+> myManageHook
---                , startupHook = setWMName "LG3D"
---        }
+          }
 
 -- A structure containing your configuration settings, overriding
 -- fields in the default config. Any you don't override, will 
 -- use the defaults defined in xmonad/XMonad/Config.hs
 -- 
--- No need to modify this.
---
 defaults = xfceConfig {
       -- simple stuff
         terminal           = myTerminal,
@@ -398,7 +347,8 @@ defaults = xfceConfig {
       -- hooks, layouts
         layoutHook         = avoidStruts . smartBorders $ myLayout,
         manageHook         = manageDocks <+> insertPosition Above Newer <+> myManageHook ,
-        startupHook        = myStartupHook 
+        startupHook        = myStartupHook, 
+        logHook            = myLogHook
     }
 
 ------------------------------------------------------------------------
