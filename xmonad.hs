@@ -173,7 +173,7 @@ myKeys conf@(XConfig {XMonad.modMask = modMask}) = M.fromList $
     -- mod-shift-{w,e,r}, Move client to screen 1, 2, or 3
     --
     [((m .|. modMask, key), screenWorkspace sc >>= flip whenJust (windows . f))
-        | (key, sc) <- zip [xK_e, xK_r, xK_w] [0..]
+        | (key, sc) <- zip [xK_r, xK_w, xK_e] [0..]
         , (f, m) <- [(W.view, 0), (W.shift, shiftMask)]]
  
  
@@ -247,7 +247,7 @@ myManageHook = composeAll
     , className =? "Smplayer"       --> doFloat
     , className =? "Psx.real"       --> doFloat
     , className =? "Gimp"           --> doFloat
-    , className =? "Kcalc"          --> doFloat
+    , className =? "Galculator"     --> doFloat
     , resource  =? "Komodo_find2"   --> doFloat
     , resource  =? "compose"        --> doFloat
     , className =? "Plasma"         --> doFloat
@@ -284,7 +284,7 @@ myFocusFollowsMouse = True
 prettyPrinter :: Connection -> PP
 prettyPrinter dbus = defaultPP { 
     ppOutput = dbusOutput dbus
-    , ppTitle = pangoColor "green" . pangoSanitize
+    , ppTitle = pangoColor "green" . pangoSanitize . (\xs -> xs ++ replicate (85 - length xs) ' ') . shorten 85
     , ppCurrent = pangoColor "green" . wrap "[" "]" . pangoSanitize
     , ppVisible = pangoColor "yellow" . wrap "(" ")" . pangoSanitize
     , ppHidden = pangoColor "orange" . pangoSanitize

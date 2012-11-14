@@ -81,7 +81,7 @@ TEXT
 ${color #ff2323}Weather:$color ${weather http://weather.noaa.gov/pub/data/observations/metar/stations/ KIAD temperature}F ${weather http://weather.noaa.gov/pub/data/observations/metar/stations/ KIAD cloud_cover}
 ${color #ffcb48}${time %c}
 ${color #ffcb48}$nodename$color      ${color #828282}$sysname $kernel on $machine$color
-${color #ffcb48}PROCESS STATS
+${color #ffcb48}Process Stats
     ${color #98c2c7}TOP PROCESSES BY CPU USAGE
     ${color #98c2c7}RANK  NAME                PID       CPU%      MEM%
     ${color #e5e5e5}1     ${top name 1}    ${top pid 1}   ${top cpu 1}    ${top mem 1}
@@ -109,7 +109,8 @@ ${color #ffcb48}CPU and RAM$color
 
     ${color #98c2c7}RAM:$color $memperc%   $mem/$memmax  ${color #78af78}${membar 6}${color}
 
-${color #ffcb48}Network$color IP: $addr
+${color #ffcb48}Network$color 
+    ${color #98c2c7}IP:$color ${color #afc932}${execpi 3600 checkaddr} (public)$color  ${color #32c9af}$addr (local)$color  
     ${color #98c2c7}Upload:$color    ${upspeed eth0}${color #98c2c7} 
     ${upspeedgraph eth0 32afff ff2332 -t}
     Download:$color  ${downspeed eth0}
