@@ -25,13 +25,14 @@ mail_spool $MAIL
 update_interval 1.0
 
 # Create own window instead of using desktop (required in nautilus)
-own_window no
+own_window yes
+own_window_type panel
 
 # Use double buffering (reduces flicker, may not work for everyone)
 double_buffer yes
 
 # Minimum size of text area
-minimum_size 150 5
+minimum_size 150 1152
 
 # Draw shades?
 draw_shades yes

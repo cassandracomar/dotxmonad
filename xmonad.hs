@@ -6,7 +6,7 @@ import System.IO
 import System.Exit
 import XMonad                   hiding ( (|||), Connection )
 import XMonad.Hooks.DynamicLog
-import XMonad.Util.Loggers
+import XMonad.Util.Loggers hiding (padL)
 import XMonad.Hooks.ManageDocks
 import XMonad.Hooks.SetWMName
 import XMonad.Hooks.InsertPosition
@@ -16,7 +16,7 @@ import XMonad.Layout.Spiral
 import XMonad.Layout.Tabbed
 import XMonad.Layout.ThreeColumns
 import XMonad.Layout.TwoPane
-import XMonad.Util.Run(spawnPipe, safeSpawnProg)
+import XMonad.Util.Run
 import XMonad.Config.Xfce
 import XMonad.Hooks.ManageHelpers
 import XMonad.Layout.LayoutCombinators
@@ -60,6 +60,10 @@ myWorkspaces    = ["1:code","2:web","3:msg","4:terms","5:media","6:docs","7:text
 myNormalBorderColor  = "#7c7c7c"
 myFocusedBorderColor = "#ffb6b0"
  
+myStatusBar = "dzen2 -x '0' -y '0' -h '24' -w 2048 -ta '1' -fg '#FFFFFF' -bg '#1B1D1E' -fn 'Inconsolata-Regular:size=14'"
+myTrayer = "trayer --edge top --align right --SetDockType true --SetPartialStrut true --expand false --width 180 --widthtype pixel --transparent true --tint 0x222222 --alpha 0 --height 24"
+myConky = "conky"
+myConkyBar = "conky -c ~/.conkybarrc"
 
 ------------------------------------------------------------------------
 -- Key bindings. Add, modify or remove key bindings here.
@@ -129,8 +133,6 @@ myKeys conf@(XConfig {XMonad.modMask = modMask}) = M.fromList $
     -- Deincrement the number of windows in the master area
     , ((modMask              , xK_period), sendMessage (IncMasterN (-1)))
  
-    -- toggle the status bar gap
-    -- TODO, update this binding with avoidStruts , ((modMask              , xK_b     ),
     , ((modMask .|. controlMask, xK_f   ), sendMessage $ JumpToLayout "Full")
     , ((modMask .|. controlMask, xK_t   ), sendMessage $ JumpToLayout "ThreeCol")
     , ((modMask .|. controlMask, xK_b   ), sendMessage $ JumpToLayout "Tabbed Simplest")
@@ -150,7 +152,7 @@ myKeys conf@(XConfig {XMonad.modMask = modMask}) = M.fromList $
     , ((modMask .|. shiftMask, xK_q     ), io exitSuccess)
  
     -- Restart xmonad
-    , ((modMask              , xK_q     ), restart "xmonad" True)
+    , ((modMask              , xK_q     ), spawnPipe "pkill conky" >> spawnPipe "pkill trayer" >> restart "xmonad" True)
     ]
     ++
  
@@ -267,6 +269,7 @@ myManageHook = composeAll
     , className =? "spotify"        --> doShift "5:media"
     , className =? "Ktorrent"       --> doShift "5:media"
     , className =? "Xchat"          --> doShift "5:media"
+    , className =? "Conky"          --> doShift ""
     , resource  =? "desktop_window" --> doIgnore
     , resource  =? "kdesktop"       --> doIgnore 
     , resource  =? "steam"          --> doIgnore
@@ -281,7 +284,7 @@ myFocusFollowsMouse = True
 prettyPrinter :: Handle -> PP
 prettyPrinter h = defaultPP { 
     ppOutput = hPutStrLn h
-    , ppTitle = dzenColor "green" "black" . toString . padR 80 . str
+    , ppTitle = dzenColor "green" "black" . toString . padL 120 . str . shorten 120
     , ppCurrent = dzenColor "green" "black" . wrap "[" "]" 
     , ppVisible = dzenColor "yellow" "black" . wrap "(" ")" 
     , ppHidden = dzenColor "orange" "black"
@@ -321,10 +324,12 @@ myStartupHook = return ()
  
 -- Run xmonad with the settings you specify. No need to modify this.
 
-myStatusBar = "dzen2 -x '0' -y '0' -h '24' -w 3840 -ta '1' -fg '#FFFFFF' -bg '#1B1D1E'"
 main :: IO ()
 main = do 
           dzenStatusBar <- spawnPipe myStatusBar
+          trayer <- spawnPipe myTrayer
+          conky <- spawnPipe myConky
+          conkyBar <- spawnPipe myConkyBar
           xmonad $ defaults {
               startupHook = setWMName "LG3D"
             , logHook = myLogHook dzenStatusBar >> fadeInactiveLogHook 0xdddddddd
