@@ -1,0 +1,81 @@
+# THIS CONFIG RELIES ON 2 SCRIPTS, CPUSPEED AND CPUTEMP
+# YOUR SYSTEM MAY NOT REQUIRE THEM, REPLACE AS DESIRED
+
+# maintain spacing between certain elements
+use_spacer none
+
+# set to yes if you want conky to be forked in the background
+background yes
+
+use_xft yes
+
+# Xft font when Xft is enabled
+xftfont Inconsolata-14
+#xftfont Andale Mono-9
+#xftfont Clean-8
+#xftfont cubicfive10:pixelsize=8
+#xftfont squaredance10:pixelsize=14
+#xftfont swf!t_v02:pixelsize=10
+
+# Text alpha when using Xft
+xftalpha 1
+mail_spool $MAIL
+
+# Update interval in seconds
+update_interval 1.0
+
+# Create own window instead of using desktop (required in nautilus)
+own_window yes
+own_window_type panel
+
+# Use double buffering (reduces flicker, may not work for everyone)
+double_buffer yes
+
+# Minimum size of text area
+minimum_size 1720 25
+maximum_width 1720
+text_buffer_size 2048000
+
+# Draw shades?
+draw_shades yes
+
+# Draw outlines?
+draw_outline no # amplifies text
+
+# Draw borders around text
+draw_borders no
+
+# Stippled borders?
+stippled_borders 1
+
+# border width
+border_width 1
+
+# Default colors and also border colors, grey90 == #e5e5e5
+default_color grey90
+default_shade_color black
+default_outline_color DarkGrey
+
+# Text alignment, other possible values are commented
+#alignment top_left
+alignment top_middle
+#alignment bottom_left
+#alignment bottom_right
+
+# Gap between borders of screen and text
+gap_x -226
+gap_y 0
+
+# Subtract file system buffers from used memory?
+no_buffers yes
+
+# set to yes if you want all text to be in uppercase
+uppercase no
+
+temperature_unit fahrenheit
+pad_percents 3
+
+# stuff after 'TEXT' will be formatted on screen
+
+TEXT
+${execpi 10 "/usr/bin/conkywx" -t "/home/arjun/.conkywx.template"} 
