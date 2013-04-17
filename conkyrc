@@ -22,17 +22,19 @@ xftalpha 1
 mail_spool $MAIL
 
 # Update interval in seconds
-update_interval 1.0
+update_interval 2.0
 
 # Create own window instead of using desktop (required in nautilus)
 own_window yes
 own_window_type panel
+own_window_argb_visual yes
+own_window_argb_value 150
 
 # Use double buffering (reduces flicker, may not work for everyone)
 double_buffer yes
 
 # Minimum size of text area
-minimum_size 150 1152
+minimum_size 150 1080
 
 # Draw shades?
 draw_shades yes
