@@ -60,10 +60,12 @@ myWorkspaces    = ["1:code","2:web","3:msg","4:terms","5:media","6:docs","7:text
 myNormalBorderColor  = "#7c7c7c"
 myFocusedBorderColor = "#ffb6b0"
  
-myStatusBar = "dzen2 -x '0' -y '0' -h '24' -w 2048 -ta '1' -fg '#FFFFFF' -bg '#1B1D1E' -fn 'Inconsolata-Regular:size=14'"
+myStatusBar = "dzen2 -x '0' -y '0' -h '24' -w 1920 -ta '1' -fg '#FFFFFF' -bg '#1B1D1E' -fn 'Inconsolata-Regular:size=14'"
+myOtherStatusBar = "dzen2 -x '1920' -y '0' -h '24' -w 1536 -ta '1' -fg '#FFFFFF' -bg '#1B1D1E' -fn 'Inconsolata-Regular:size=14'"
 myTrayer = "trayer --edge top --align right --SetDockType true --SetPartialStrut true --expand false --width 180 --widthtype pixel --transparent true --tint 0x222222 --alpha 0 --height 24"
 myConky = "conky"
 myConkyBar = "conky -c ~/.conkybarrc"
+xfcepanel = "xfce4-panel"
 
 ------------------------------------------------------------------------
 -- Key bindings. Add, modify or remove key bindings here.
@@ -140,7 +142,7 @@ myKeys conf@(XConfig {XMonad.modMask = modMask}) = M.fromList $
     , ((modMask .|. controlMask, xK_Down), sendMessage $ Move D)
     , ((modMask .|. controlMask, xK_Right), sendMessage $ Move R)
     , ((modMask .|. controlMask, xK_Left), sendMessage $ Move L)
-    , ((modMask .|. controlMask, xK_space), layoutSplitScreen 2 (TwoPane 0.8 0.2))
+    , ((modMask .|. controlMask, xK_space), layoutSplitScreen 2 (TwoPane 0.74375 0.25625))
     , ((modMask .|. controlMask .|. shiftMask, xK_space), rescreen)
     , ((modMask, xK_d)                                  , safeSpawnProg "/home/arjun/bin/dock.sh"  )
     , ((modMask .|. shiftMask, xK_d)                    , safeSpawnProg "/home/arjun/bin/undock.sh")
@@ -152,7 +154,7 @@ myKeys conf@(XConfig {XMonad.modMask = modMask}) = M.fromList $
     , ((modMask .|. shiftMask, xK_q     ), io exitSuccess)
  
     -- Restart xmonad
-    , ((modMask              , xK_q     ), spawnPipe "pkill conky" >> spawnPipe "pkill trayer" >> restart "xmonad" True)
+    , ((modMask              , xK_q     ), spawnPipe "pkill conky" >> spawnPipe "pkill xfce4-panel" >> restart "xmonad" True)
     ]
     ++
  
@@ -228,7 +230,7 @@ myLayout = (avoidStruts . windowNavigation) (tiled ||| Mirror tiled ||| tabbed s
 -- Window rules:
  
 -- Execute arbitrary actions and WindowSet manipulations when managing
--- a new window. You can use this to, for example, always float a
+
 -- particular program, or have a client always appear on a particular
 -- workspace.
 --
@@ -252,6 +254,7 @@ myManageHook = composeAll
     , className =? "Xfce4-mixer"    --> doFloat
     , className =? "Xfce4-settings-manager" --> doFloat
     , className =? "Xfce4*"         --> doFloat
+    , className =? "Xfce4-panel"         --> doFloat
     , title     =? "Downloads"      --> doFloat
     , title     =? "About Aurora"   --> doFloat
     , className =? "Thunar"         --> doFloat
@@ -273,6 +276,7 @@ myManageHook = composeAll
     , resource  =? "desktop_window" --> doIgnore
     , resource  =? "kdesktop"       --> doIgnore 
     , resource  =? "steam"          --> doIgnore
+    , className  =? "Firefox"    --> doShift "2:web"
     , isFullscreen                  --> (doF W.focusDown <+> doFullFloat) 
     ] 
  
@@ -281,10 +285,10 @@ myFocusFollowsMouse :: Bool
 myFocusFollowsMouse = True
  
 
-prettyPrinter :: Handle -> PP
-prettyPrinter h = defaultPP { 
+prettyPrinter ::  Int -> Handle -> PP
+prettyPrinter padSize h = defaultPP { 
     ppOutput = hPutStrLn h
-    , ppTitle = dzenColor "green" "black" . toString . padL 120 . str . shorten 120
+    , ppTitle = dzenColor "green" "black" . toString . padC padSize . str . shorten padSize
     , ppCurrent = dzenColor "green" "black" . wrap "[" "]" 
     , ppVisible = dzenColor "yellow" "black" . wrap "(" ")" 
     , ppHidden = dzenColor "orange" "black"
@@ -307,7 +311,7 @@ prettyPrinter h = defaultPP {
 --
 -- > logHook = dynamicLogDzen
 --
-myLogHook h = dynamicLogWithPP $ prettyPrinter h
+myLogHook n h = dynamicLogWithPP $ prettyPrinter n h
  
 ------------------------------------------------------------------------
 -- Startup hook
@@ -327,12 +331,12 @@ myStartupHook = return ()
 main :: IO ()
 main = do 
           dzenStatusBar <- spawnPipe myStatusBar
-          trayer <- spawnPipe myTrayer
+          dzenOtherStatusBar <- spawnPipe myOtherStatusBar
           conky <- spawnPipe myConky
-          conkyBar <- spawnPipe myConkyBar
+          panel <- spawnPipe xfcepanel
           xmonad $ defaults {
               startupHook = setWMName "LG3D"
-            , logHook = myLogHook dzenStatusBar >> fadeInactiveLogHook 0xdddddddd
+            , logHook = myLogHook 100 dzenStatusBar >> myLogHook 60 dzenOtherStatusBar >> fadeInactiveLogHook 0xdddddddd
           }
 
 -- A structure containing your configuration settings, overriding

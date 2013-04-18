@@ -67,7 +67,7 @@ alignment top_left
 
 # Gap between borders of screen and text
 gap_x 0
-gap_y 32
+gap_y 29
 
 # Subtract file system buffers from used memory?
 no_buffers yes
@@ -109,6 +109,8 @@ ${color #ffcb48}CPU and RAM$color
     ${color #98c2c7}CPU 4:$color ${cpu cpu4}%   ${color #78af78}${cpugraph cpu4 32afff ff2332 -t}
     ${color #98c2c7}CPU 5:$color ${cpu cpu5}%   ${color #78af78}${cpugraph cpu5 32afff ff2332 -t}
     ${color #98c2c7}CPU 6:$color ${cpu cpu6}%   ${color #78af78}${cpugraph cpu6 32afff ff2332 -t}
+    ${color #98c2c7}CPU 7:$color ${cpu cpu7}%   ${color #78af78}${cpugraph cpu7 32afff ff2332 -t}
+    ${color #98c2c7}CPU 8:$color ${cpu cpu8}%   ${color #78af78}${cpugraph cpu8 32afff ff2332 -t}
 
     ${color #98c2c7}RAM:$color $memperc%   $mem/$memmax  ${color #78af78}${membar 6}${color}
 
@@ -124,7 +126,6 @@ ${color #ffcb48}Disk$color
     ${color #98c2c7}Read:$color  ${diskio_read /dev/sdb}${color #78af78}${diskiograph_read /dev/sdb 32afff ff2332 -t}
     ${color #98c2c7}Write:$color ${diskio_write /dev/sdb}${color #78af78}${diskiograph_write /dev/sdb 32afff ff2332 -t} 
 
-
-    ${color #98c2c7}/dev/sda:$color  ${diskio /dev/sda}${color #78af78}${diskiograph /dev/sda 32afff ff2332 -t}
-    ${color #98c2c7}/dev/sdc:$color  ${diskio /dev/sdc}${color #78af78}${diskiograph /dev/sdc 32afff ff2332 -t} 
+#    ${color #98c2c7}/dev/sdb:$color  ${diskio /dev/sda}${color #78af78}${diskiograph /dev/sdb 32afff ff2332 -t}
+#    ${color #98c2c7}/dev/sda:$color  ${diskio /dev/sdc}${color #78af78}${diskiograph /dev/sda 32afff ff2332 -t} 
 
