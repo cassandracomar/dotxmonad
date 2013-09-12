@@ -24,6 +24,7 @@ import XMonad.Layout.LayoutScreens
 import XMonad.Layout.WindowNavigation
 import System.Dzen.Padding
 import System.Dzen.Base
+import XMonad.Actions.Navigation2D
 
 import qualified XMonad.StackSet as W
 import qualified Data.Map        as M
@@ -60,12 +61,13 @@ myWorkspaces    = ["1:code","2:web","3:msg","4:terms","5:media","6:docs","7:text
 myNormalBorderColor  = "#7c7c7c"
 myFocusedBorderColor = "#ffb6b0"
  
-myStatusBar = "dzen2 -x '0' -y '0' -h '24' -w 1920 -ta '1' -fg '#FFFFFF' -bg '#1B1D1E' -fn 'Inconsolata-Regular:size=14'"
-myOtherStatusBar = "dzen2 -x '1920' -y '0' -h '24' -w 1536 -ta '1' -fg '#FFFFFF' -bg '#1B1D1E' -fn 'Inconsolata-Regular:size=14'"
-myTrayer = "trayer --edge top --align right --SetDockType true --SetPartialStrut true --expand false --width 180 --widthtype pixel --transparent true --tint 0x222222 --alpha 0 --height 24"
+myStatusBar = "dzen2 -e 'button2=;' -x '0' -y '0' -h '24' -w 2048 -ta '1' -fg '#FFFFFF' -bg '#1B1D1E' -fn 'Inconsolata-Regular:size=14'"
+myOtherStatusBar = "dzen2 -e 'button2=;' -x '2048' -y '0' -h '24' -w 1536 -ta '1' -fg '#FFFFFF' -bg '#1B1D1E' -fn 'Inconsolata-Regular:size=14'"
+myTrayer = "trayer --edge top --align right --SetDockType true --SetPartialStrut true --expand false --width 384 --widthtype pixel --transparent true --tint 0x222222 --alpha 0 --height 24"
 myConky = "conky"
 myConkyBar = "conky -c ~/.conkybarrc"
 xfcepanel = "xfce4-panel"
+conkySplit = screenGo L False >> layoutSplitScreen 2 (TwoPane 0.7575 0.2425)
 
 ------------------------------------------------------------------------
 -- Key bindings. Add, modify or remove key bindings here.
@@ -82,7 +84,7 @@ myKeys conf@(XConfig {XMonad.modMask = modMask}) = M.fromList $
     , ((modMask .|. controlMask, xK_l     ), spawn "xscreensaver-command -lock")
 
     -- launch dmenu
-    , ((modMask,               xK_p     ), spawn "dmenu_run")
+    , ((modMask,               xK_p     ), spawn "export PATH=$HOME/bin:$PATH; dmenu_run")
  
     -- launch gmrun
     , ((modMask .|. shiftMask, xK_p     ), spawn "gmrun")
@@ -142,10 +144,8 @@ myKeys conf@(XConfig {XMonad.modMask = modMask}) = M.fromList $
     , ((modMask .|. controlMask, xK_Down), sendMessage $ Move D)
     , ((modMask .|. controlMask, xK_Right), sendMessage $ Move R)
     , ((modMask .|. controlMask, xK_Left), sendMessage $ Move L)
-    , ((modMask .|. controlMask, xK_space), layoutSplitScreen 2 (TwoPane 0.74375 0.25625))
+    , ((modMask .|. controlMask, xK_space), conkySplit)
     , ((modMask .|. controlMask .|. shiftMask, xK_space), rescreen)
-    , ((modMask, xK_d)                                  , safeSpawnProg "/home/arjun/bin/dock.sh"  )
-    , ((modMask .|. shiftMask, xK_d)                    , safeSpawnProg "/home/arjun/bin/undock.sh")
     , ((modMask .|. shiftMask, xK_b), sendMessage ToggleStruts)
  
     , ((controlMask, xK_Up), spawn "amixer -q set Master 1+ unmute")
@@ -154,7 +154,7 @@ myKeys conf@(XConfig {XMonad.modMask = modMask}) = M.fromList $
     , ((modMask .|. shiftMask, xK_q     ), io exitSuccess)
  
     -- Restart xmonad
-    , ((modMask              , xK_q     ), spawnPipe "pkill conky" >> spawnPipe "pkill xfce4-panel" >> restart "xmonad" True)
+    , ((modMask              , xK_q     ), rescreen >> spawnPipe "pkill trayer" >> spawnPipe "pkill conky" >> spawnPipe "pkill xfce4-panel" >> restart "xmonad" True)
     ]
     ++
  
@@ -172,7 +172,7 @@ myKeys conf@(XConfig {XMonad.modMask = modMask}) = M.fromList $
     -- mod-shift-{w,e,r}, Move client to screen 1, 2, or 3
     --
     [((m .|. modMask, key), screenWorkspace sc >>= flip whenJust (windows . f))
-        | (key, sc) <- zip [xK_r, xK_w, xK_e] [0..]
+        | (key, sc) <- zip [ xK_e, xK_r, xK_w ] [0..]
         , (f, m) <- [(W.view, 0), (W.shift, shiftMask)]]
  
  
@@ -321,7 +321,7 @@ myLogHook n h = dynamicLogWithPP $ prettyPrinter n h
 -- per-workspace layout choices.
 --
 -- By default, do nothing.
-myStartupHook = return ()
+myStartupHook = rescreen >> conkySplit >> setWMName "LG3D"
  
 ------------------------------------------------------------------------
 -- Now run xmonad with all the defaults we set up.
@@ -333,10 +333,9 @@ main = do
           dzenStatusBar <- spawnPipe myStatusBar
           dzenOtherStatusBar <- spawnPipe myOtherStatusBar
           conky <- spawnPipe myConky
-          panel <- spawnPipe xfcepanel
+          panel <- spawnPipe myTrayer
           xmonad $ defaults {
-              startupHook = setWMName "LG3D"
-            , logHook = myLogHook 100 dzenStatusBar >> myLogHook 60 dzenOtherStatusBar >> fadeInactiveLogHook 0xdddddddd
+            logHook = myLogHook 100 dzenStatusBar >> myLogHook 60 dzenOtherStatusBar >> fadeInactiveLogHook 0xdddddddd
           }
 
 -- A structure containing your configuration settings, overriding

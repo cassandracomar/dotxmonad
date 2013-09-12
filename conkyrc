@@ -1,5 +1,3 @@
-# THIS CONFIG RELIES ON 2 SCRIPTS, CPUSPEED AND CPUTEMP
-# YOUR SYSTEM MAY NOT REQUIRE THEM, REPLACE AS DESIRED
 
 # maintain spacing between certain elements
 use_spacer yes
@@ -49,7 +47,7 @@ draw_borders no
 stippled_borders 1
 
 # border margins
-border_margin 9
+#border_margin 9
 
 # border width
 border_width 1
@@ -82,7 +80,7 @@ pad_percents 3
 
 TEXT
 ${color #ff2323}Weather:$color ${weather http://weather.noaa.gov/pub/data/observations/metar/stations/ KIAD temperature}F ${weather http://weather.noaa.gov/pub/data/observations/metar/stations/ KIAD cloud_cover}
-${color #ffcb48}${time %c}
+${color #ffcb48}${time %a %b %d %r %Y}
 ${color #ffcb48}$nodename$color      ${color #828282}$sysname $kernel on $machine$color
 ${color #ffcb48}Process Stats
     ${color #98c2c7}TOP PROCESSES BY CPU USAGE
@@ -109,22 +107,20 @@ ${color #ffcb48}CPU and RAM$color
     ${color #98c2c7}CPU 4:$color ${cpu cpu4}%   ${color #78af78}${cpugraph cpu4 32afff ff2332 -t}
     ${color #98c2c7}CPU 5:$color ${cpu cpu5}%   ${color #78af78}${cpugraph cpu5 32afff ff2332 -t}
     ${color #98c2c7}CPU 6:$color ${cpu cpu6}%   ${color #78af78}${cpugraph cpu6 32afff ff2332 -t}
-    ${color #98c2c7}CPU 7:$color ${cpu cpu7}%   ${color #78af78}${cpugraph cpu7 32afff ff2332 -t}
-    ${color #98c2c7}CPU 8:$color ${cpu cpu8}%   ${color #78af78}${cpugraph cpu8 32afff ff2332 -t}
 
     ${color #98c2c7}RAM:$color $memperc%   $mem/$memmax  ${color #78af78}${membar 6}${color}
 
 ${color #ffcb48}Network$color 
-    ${color #98c2c7}IP:$color ${color #afc932}${execpi 3600 checkaddr} (public)$color  ${color #32c9af}$addr (local)$color  
-    ${color #98c2c7}Upload:$color    ${upspeed eth0}${color #98c2c7} 
+    ${color #98c2c7}IP:$color ${color #afc932}${execpi 3600 checkaddr} (public)$color  ${color #32c9af}${addr enp5s0} (local)$color  
+    ${color #98c2c7}Upload:$color    ${upspeed enp5s0}${color #98c2c7} 
     ${upspeedgraph eth0 32afff ff2332 -t}
-    Download:$color  ${downspeed eth0}
+    Download:$color  ${downspeed enp5s0}
     ${downspeedgraph eth0 32afff ff2332 -t}
 
 ${color #ffcb48}Disk$color 
     ${color #98c2c7}/:$color ${fs_used_perc /}%     $fs_used/$fs_size  ${color #78af78}${fs_bar 6 /}$color
-    ${color #98c2c7}Read:$color  ${diskio_read /dev/sdb}${color #78af78}${diskiograph_read /dev/sdb 32afff ff2332 -t}
-    ${color #98c2c7}Write:$color ${diskio_write /dev/sdb}${color #78af78}${diskiograph_write /dev/sdb 32afff ff2332 -t} 
+    ${color #98c2c7}Read:$color  ${diskio_read /dev/sdc}${color #78af78}${diskiograph_read /dev/sdc 32afff ff2332 -t}
+    ${color #98c2c7}Write:$color ${diskio_write /dev/sdc}${color #78af78}${diskiograph_write /dev/sdc 32afff ff2332 -t} 
 
 #    ${color #98c2c7}/dev/sdb:$color  ${diskio /dev/sda}${color #78af78}${diskiograph /dev/sdb 32afff ff2332 -t}
 #    ${color #98c2c7}/dev/sda:$color  ${diskio /dev/sdc}${color #78af78}${diskiograph /dev/sda 32afff ff2332 -t} 
