@@ -32,7 +32,7 @@ import qualified Data.Map        as M
 -- The preferred terminal program, which is used in a binding below and by
 -- certain contrib modules.
 --
-myTerminal      = "urxvt"
+myTerminal      = "lxterminal"
  
 -- Width of the window border in pixels.
 --
@@ -284,16 +284,18 @@ myManageHook = composeAll
 myFocusFollowsMouse :: Bool
 myFocusFollowsMouse = True
  
+wrapClickable :: Int -> String -> String
+wrapClickable i s = wrap ("^ca(1, xdotool key alt+" ++ [s !! i] ++ ")") "^ca()" s
 
 prettyPrinter ::  Int -> Handle -> PP
 prettyPrinter padSize h = defaultPP { 
     ppOutput = hPutStrLn h
     , ppTitle = dzenColor "green" "black" . toString . padC padSize . str . shorten padSize
-    , ppCurrent = dzenColor "green" "black" . wrap "[" "]" 
-    , ppVisible = dzenColor "yellow" "black" . wrap "(" ")" 
-    , ppHidden = dzenColor "orange" "black"
-    , ppHiddenNoWindows = dzenColor "white" "black"
-    , ppUrgent = dzenColor "red" "black"
+    , ppCurrent = dzenColor "green" "black" . wrapClickable 1 . wrap "[" "]" 
+    , ppVisible = dzenColor "yellow" "black" . wrapClickable 1 . wrap "(" ")" 
+    , ppHidden = dzenColor "orange" "black" . wrapClickable 0
+    , ppHiddenNoWindows = dzenColor "white" "black" . wrapClickable 0
+    , ppUrgent = dzenColor "red" "black" . wrapClickable 0
     , ppLayout = dzenColor "green" "black"
     , ppOrder = \(ws:l:t:r) -> [t, ws, l] ++ r
     , ppExtras = [ date "%A %b %e" ]
