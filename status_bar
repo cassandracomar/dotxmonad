@@ -1,0 +1,6 @@
+#!/bin/bash
+foreground=$1
+background=$2
+font=$3
+
+conky -qc ~/.xmonad/.conky_dzen | dzen2 -x '2048' -w '1536' -h '24' -ta 'r' -bg $background -fg $foreground -y '0' -fn $font -e 'button2=;'

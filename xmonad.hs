@@ -25,9 +25,11 @@ import XMonad.Layout.WindowNavigation
 import System.Dzen.Padding
 import System.Dzen.Base
 import XMonad.Actions.Navigation2D
+import XMonad.Layout.Spacing
 
 import qualified XMonad.StackSet as W
 import qualified Data.Map        as M
+import Data.Maybe (fromJust)
 
 -- The preferred terminal program, which is used in a binding below and by
 -- certain contrib modules.
@@ -36,7 +38,7 @@ myTerminal      = "lxterminal"
  
 -- Width of the window border in pixels.
 --
-myBorderWidth   = 1
+myBorderWidth   = 2
  
 -- modMask lets you specify which modkey you want to use. The default
 -- is mod1Mask ("left alt").  You may also consider using mod3Mask
@@ -54,20 +56,25 @@ myModMask       = mod1Mask
 --
 -- > workspaces = ["web", "irc", "code" ] ++ map show [4..9]
 --
-myWorkspaces    = ["1:code","2:web","3:msg","4:terms","5:media","6:docs","7:textbooks","8:overflow","9:misc", ""]
+myWorkspaces    = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", ""]
  
 -- Border colors for unfocused and focused windows, respectively.
 --
-myNormalBorderColor  = "#7c7c7c"
-myFocusedBorderColor = "#ffb6b0"
+myNormalBorderColor  = "#2c2c2c"
+myFocusedBorderColor = "#dedede"
  
-myStatusBar = "dzen2 -e 'button2=;' -x '0' -y '0' -h '24' -w 2048 -ta '1' -fg '#FFFFFF' -bg '#1B1D1E' -fn 'Inconsolata-Regular:size=14'"
-myOtherStatusBar = "dzen2 -e 'button2=;' -x '2048' -y '0' -h '24' -w 1536 -ta '1' -fg '#FFFFFF' -bg '#1B1D1E' -fn 'Inconsolata-Regular:size=14'"
-myTrayer = "trayer --edge top --align right --SetDockType true --SetPartialStrut true --expand false --width 384 --widthtype pixel --transparent true --tint 0x222222 --alpha 0 --height 24"
+myStatusBar = "dzen2 -e 'button2=;' -x '0' -y '0' -h '24' -w 2048 -ta 'l' -fg '#FFFFFF' -bg '#1B1D1E' -fn 'Inconsolata-Regular:size=14'"
 myConky = "conky"
-myConkyBar = "conky -c ~/.conkybarrc"
-xfcepanel = "xfce4-panel"
-conkySplit = screenGo L False >> layoutSplitScreen 2 (TwoPane 0.7575 0.2425)
+myTrayer = "trayer --edge top --align right --SetDockType true --SetPartialStrut true --expand false --width 384 --widthtype pixel --transparent true --tint 0x222222 --alpha 0 --height 24"
+myFont = "xft:Inconsolata-dz for Powerline:size=14"
+background= "#181512"
+foreground= "#D6C3B6"
+myStatusBar2 = "~/.xmonad/status_bar '"++foreground++"' '"++background++"' "++myFont
+
+splitRatio = 0.755
+conkySplit = screenGo L False >> layoutSplitScreen 2 (TwoPane splitRatio (1 - splitRatio))
+
+windowSpacing = 20
 
 ------------------------------------------------------------------------
 -- Key bindings. Add, modify or remove key bindings here.
@@ -148,13 +155,14 @@ myKeys conf@(XConfig {XMonad.modMask = modMask}) = M.fromList $
     , ((modMask .|. controlMask .|. shiftMask, xK_space), rescreen)
     , ((modMask .|. shiftMask, xK_b), sendMessage ToggleStruts)
  
-    , ((controlMask, xK_Up), spawn "amixer -q set Master 1+ unmute")
-    , ((controlMask, xK_Down), spawn "amixer -q set Master 1- unmute")
+    , ((controlMask, xK_Up), spawn "pamixer --increase 5")
+    , ((controlMask, xK_Down), spawn "pamixer --decrease 5")
+    , ((controlMask, xK_space), spawn "mpc toggle")
     -- Quit xmonad
     , ((modMask .|. shiftMask, xK_q     ), io exitSuccess)
  
     -- Restart xmonad
-    , ((modMask              , xK_q     ), rescreen >> spawnPipe "pkill trayer" >> spawnPipe "pkill conky" >> spawnPipe "pkill xfce4-panel" >> restart "xmonad" True)
+    , ((modMask              , xK_q     ), rescreen >> spawnPipe "pkill trayer" >> spawnPipe "pkill conky" >> restart "xmonad" True)
     ]
     ++
  
@@ -210,7 +218,7 @@ myTabConfig = defaultTheme {   activeBorderColor = "#7C7C7C"
                              , inactiveBorderColor = "#7C7C7C"
                              , inactiveTextColor = "#EEEEEE"
                              , inactiveColor = "#000000" }
-myLayout = (avoidStruts . windowNavigation) (tiled ||| Mirror tiled ||| tabbed shrinkText myTabConfig ||| Full ||| spiral (6/7) ||| ThreeColMid 1 (3/100) (1/2) ||| (tabbed shrinkText myTabConfig  **|*** Mirror tiled2))
+myLayout = smartSpacing windowSpacing . windowNavigation $ tiled ||| Mirror tiled ||| tabbed shrinkText myTabConfig ||| Full ||| spiral ratio3 ||| ThreeColMid nmaster delta ratio ||| (tabbed shrinkText myTabConfig  **|*** Mirror tiled2)
   where
      -- default tiling algorithm partitions the screen into two panes
      tiled   = Tall nmaster delta ratio
@@ -222,6 +230,7 @@ myLayout = (avoidStruts . windowNavigation) (tiled ||| Mirror tiled ||| tabbed s
      -- Default proportion of screen occupied by master pane
      ratio   = 1/2
      ratio2  = 7/8
+     ratio3  = 6/7
  
      -- Percent of screen to increment by when resizing panes
      delta   = 3/100
@@ -254,10 +263,10 @@ myManageHook = composeAll
     , className =? "Xfce4-mixer"    --> doFloat
     , className =? "Xfce4-settings-manager" --> doFloat
     , className =? "Xfce4*"         --> doFloat
-    , className =? "Xfce4-panel"         --> doFloat
+    , className =? "Xfce4-panel"    --> doFloat
+    , className =? "feh"            --> doFloat
     , title     =? "Downloads"      --> doFloat
     , title     =? "About Aurora"   --> doFloat
-    , className =? "Thunar"         --> doFloat
     , className =? "Terminal"       --> doShift "4:terms"
     , className =? "Gedit"          --> doShift "1:code"
     , className =? "Emacs"          --> doShift "1:code"
@@ -265,7 +274,6 @@ myManageHook = composeAll
     , className =? "Emacs"          --> doShift "1:code"
     , className =? "Gvim"           --> doShift "1:code"
     , className =? "Aurora"         --> doShift "2:web"
-    , className =? "Thunderbird-bin" --> doShift "3:msg"
     , className =? "Pidgin"         --> doShift "3:msg"
     , className =? "VirtualBox"     --> doShift "9:misc"
     , className =? "banshee-1"      --> doShift "5:media"
@@ -276,7 +284,7 @@ myManageHook = composeAll
     , resource  =? "desktop_window" --> doIgnore
     , resource  =? "kdesktop"       --> doIgnore 
     , resource  =? "steam"          --> doIgnore
-    , className  =? "Firefox"    --> doShift "2:web"
+    , className =? "Firefox"        --> doShift "2:web"
     , isFullscreen                  --> (doF W.focusDown <+> doFullFloat) 
     ] 
  
@@ -284,25 +292,26 @@ myManageHook = composeAll
 myFocusFollowsMouse :: Bool
 myFocusFollowsMouse = True
  
-wrapClickable :: Int -> String -> String
-wrapClickable i s = wrap ("^ca(1, xdotool key alt+" ++ [s !! i] ++ ")") "^ca()" s
+wrapWorkspaceClickable :: String -> String
+wrapWorkspaceClickable s = wrap ("^ca(1, xdotool key alt+" ++ (show $ romanToInt s) ++ ")") "^ca()" s
 
-prettyPrinter ::  Int -> Handle -> PP
-prettyPrinter padSize h = defaultPP { 
-    ppOutput = hPutStrLn h
-    , ppTitle = dzenColor "green" "black" . toString . padC padSize . str . shorten padSize
-    , ppCurrent = dzenColor "green" "black" . wrapClickable 1 . wrap "[" "]" 
-    , ppVisible = dzenColor "yellow" "black" . wrapClickable 1 . wrap "(" ")" 
-    , ppHidden = dzenColor "orange" "black" . wrapClickable 0
-    , ppHiddenNoWindows = dzenColor "white" "black" . wrapClickable 0
-    , ppUrgent = dzenColor "red" "black" . wrapClickable 0
-    , ppLayout = dzenColor "green" "black"
-    , ppOrder = \(ws:l:t:r) -> [t, ws, l] ++ r
-    , ppExtras = [ date "%A %b %e" ]
+prettyPrinter :: Handle -> PP
+prettyPrinter h = defaultPP { 
+      ppOutput = hPutStrLn h
+    , ppTitle = dzenColor "green" "black" 
+    , ppCurrent = dzenColor "green" "black" . wrapWorkspaceClickable   
+    , ppVisible = dzenColor "yellow" "black" . wrapWorkspaceClickable
+    , ppHidden = dzenColor "orange" "black" . wrapWorkspaceClickable
+    , ppHiddenNoWindows = dzenColor "white" "black" . wrapWorkspaceClickable
+    , ppUrgent = dzenColor "red" "black" . wrapWorkspaceClickable
+    , ppLayout = dzenColor "green" "black" . drop 16
+    , ppOrder = id
     , ppSep = " | "
 }
 
-
+romanToInt :: String -> Int
+romanToInt = fst . foldr (\p (t,s) -> if p >= s then (t+p,p) else (t-p,p)) (0,0)
+              . map (fromJust . flip lookup (zip "IVXLCDM" [1,5,10,50,100,500,1000]))
 ------------------------------------------------------------------------
 -- Status bars and logging
  
@@ -313,7 +322,7 @@ prettyPrinter padSize h = defaultPP {
 --
 -- > logHook = dynamicLogDzen
 --
-myLogHook n h = dynamicLogWithPP $ prettyPrinter n h
+myLogHook h = dynamicLogWithPP $ prettyPrinter h
  
 ------------------------------------------------------------------------
 -- Startup hook
@@ -333,11 +342,10 @@ myStartupHook = rescreen >> conkySplit >> setWMName "LG3D"
 main :: IO ()
 main = do 
           dzenStatusBar <- spawnPipe myStatusBar
-          dzenOtherStatusBar <- spawnPipe myOtherStatusBar
-          conky <- spawnPipe myConky
-          panel <- spawnPipe myTrayer
+          conky         <- spawnPipe myConky
+          statusBar     <- spawnPipe myStatusBar2
           xmonad $ defaults {
-            logHook = myLogHook 100 dzenStatusBar >> myLogHook 60 dzenOtherStatusBar >> fadeInactiveLogHook 0xdddddddd
+            logHook = myLogHook dzenStatusBar >> fadeInactiveLogHook 0xdddddddd
           }
 
 -- A structure containing your configuration settings, overriding
