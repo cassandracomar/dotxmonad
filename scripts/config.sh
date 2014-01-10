@@ -5,8 +5,8 @@ foreground="#8c644c"
 highlight="#d6c3b6"
 
 #XPOS=$(xdotool getmouselocation | awk -F " " '{print $1}' | cut -d ":" -f 2)
-YPOS="11"
-HEIGHT="12"
+YPOS="10"
+HEIGHT="10"
 XOFFSET=2048
 
 #FONT="-artwiz-lime-medium-r-normal-*-10-110-75-75-m-50-iso8859-*"

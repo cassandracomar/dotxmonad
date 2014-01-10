@@ -6,7 +6,6 @@ import System.IO
 import System.Exit
 import XMonad                   hiding ( (|||), Connection )
 import XMonad.Hooks.DynamicLog
-import XMonad.Util.Loggers hiding (padL)
 import XMonad.Hooks.ManageDocks
 import XMonad.Hooks.SetWMName
 import XMonad.Hooks.InsertPosition
@@ -22,8 +21,6 @@ import XMonad.Hooks.ManageHelpers
 import XMonad.Layout.LayoutCombinators
 import XMonad.Layout.LayoutScreens
 import XMonad.Layout.WindowNavigation
-import System.Dzen.Padding
-import System.Dzen.Base
 import XMonad.Actions.Navigation2D
 import XMonad.Layout.Spacing
 
@@ -38,7 +35,7 @@ myTerminal      = "lxterminal"
  
 -- Width of the window border in pixels.
 --
-myBorderWidth   = 2
+myBorderWidth   = 3
  
 -- modMask lets you specify which modkey you want to use. The default
 -- is mod1Mask ("left alt").  You may also consider using mod3Mask
@@ -60,16 +57,17 @@ myWorkspaces    = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", ""]
  
 -- Border colors for unfocused and focused windows, respectively.
 --
-myNormalBorderColor  = "#2c2c2c"
-myFocusedBorderColor = "#dedede"
+myNormalBorderColor  = "#3c2c1c"
+myFocusedBorderColor = "#eedece"
  
-myStatusBar = "dzen2 -e 'button2=;' -x '0' -y '0' -h '24' -w 2048 -ta 'l' -fg '#FFFFFF' -bg '#1B1D1E' -fn 'Inconsolata-Regular:size=14'"
+myStatusBar = "dzen2 -e 'button2=;' -x '0' -y '0' -h '24' -w 2048 -ta 'l' -fg '" ++ foreground ++ "' -bg '" ++ background ++ "' -fn '" ++ myFont ++ "'"
 myConky = "conky"
-myTrayer = "trayer --edge top --align right --SetDockType true --SetPartialStrut true --expand false --width 384 --widthtype pixel --transparent true --tint 0x222222 --alpha 0 --height 24"
+myTrayer = "trayer --edge top --align right --SetDockType true --SetPartialStrut true --expand false --width 150 --widthtype pixel --transparent true --tint '" ++ background ++ "' --alpha 0 --height 24"
 myFont = "xft:Inconsolata-dz for Powerline:size=14"
 background= "#181512"
 foreground= "#D6C3B6"
-myStatusBar2 = "~/.xmonad/status_bar '"++foreground++"' '"++background++"' "++myFont
+myStatusBar2 = "~/.xmonad/status_bar '" ++ foreground ++ "' '" ++ background ++ "' " ++ myFont
+myStatusBar3 = "dzen2 -e 'button2=;' -x '2048' -y '0' -h '24' -w 1100 -ta 'l' -fg '" ++ foreground ++ "' -bg '" ++ background ++ "' -fn '" ++ myFont ++ "'"
 
 splitRatio = 0.755
 conkySplit = screenGo L False >> layoutSplitScreen 2 (TwoPane splitRatio (1 - splitRatio))
@@ -155,14 +153,20 @@ myKeys conf@(XConfig {XMonad.modMask = modMask}) = M.fromList $
     , ((modMask .|. controlMask .|. shiftMask, xK_space), rescreen)
     , ((modMask .|. shiftMask, xK_b), sendMessage ToggleStruts)
  
-    , ((controlMask, xK_Up), spawn "pamixer --increase 5")
-    , ((controlMask, xK_Down), spawn "pamixer --decrease 5")
-    , ((controlMask, xK_space), spawn "mpc toggle")
+    , ((controlMask,                xK_Up),       spawn "pamixer --increase 5")
+    , ((controlMask,                xK_Down),     spawn "pamixer --decrease 5")
+    , ((controlMask,                xK_space),    spawn "mpc toggle")
+    , ((controlMask,                xK_Right),    spawn "mpc next")
+    , ((controlMask,                xK_Left),     spawn "mpc prev")
+    , ((controlMask .|. shiftMask,  xK_Right),    spawn "mpc seek +5%")
+    , ((controlMask .|. shiftMask,  xK_Left),     spawn "mpc seek -5%")
+    , ((controlMask .|. shiftMask,  xK_Return),   spawn "/home/arjun/bin/music")
+
     -- Quit xmonad
     , ((modMask .|. shiftMask, xK_q     ), io exitSuccess)
  
     -- Restart xmonad
-    , ((modMask              , xK_q     ), rescreen >> spawnPipe "pkill trayer" >> spawnPipe "pkill conky" >> restart "xmonad" True)
+    , ((modMask              , xK_q     ), rescreen >> spawnPipe "pkill trayer" >> spawnPipe "pkill conky" >> spawnPipe "pkill dzen2" >> restart "xmonad" True)
     ]
     ++
  
@@ -218,7 +222,7 @@ myTabConfig = defaultTheme {   activeBorderColor = "#7C7C7C"
                              , inactiveBorderColor = "#7C7C7C"
                              , inactiveTextColor = "#EEEEEE"
                              , inactiveColor = "#000000" }
-myLayout = smartSpacing windowSpacing . windowNavigation $ tiled ||| Mirror tiled ||| tabbed shrinkText myTabConfig ||| Full ||| spiral ratio3 ||| ThreeColMid nmaster delta ratio ||| (tabbed shrinkText myTabConfig  **|*** Mirror tiled2)
+myLayout = (smartSpacing windowSpacing . windowNavigation $ tiled ||| Mirror tiled |||  Full ||| spiral ratio3 ||| ThreeColMid nmaster delta ratio ) ||| (windowNavigation $ tabbed shrinkText myTabConfig ||| tabbed shrinkText myTabConfig  **|*** Mirror tiled2)
   where
      -- default tiling algorithm partitions the screen into two panes
      tiled   = Tall nmaster delta ratio
@@ -251,36 +255,19 @@ myLayout = smartSpacing windowSpacing . windowNavigation $ tiled ||| Mirror tile
 -- 'className' and 'resource' are used below.
 --
 myManageHook = composeAll
-    [ className =? "MPlayer"        --> doFloat
-    , className =? "Smplayer"       --> doFloat
-    , className =? "Psx.real"       --> doFloat
-    , className =? "Gimp"           --> doFloat
-    , className =? "Galculator"     --> doFloat
-    , resource  =? "Komodo_find2"   --> doFloat
-    , resource  =? "compose"        --> doFloat
-    , className =? "Plasma"         --> doFloat
-    , className =? "Update"         --> doFloat
-    , className =? "Xfce4-mixer"    --> doFloat
-    , className =? "Xfce4-settings-manager" --> doFloat
-    , className =? "Xfce4*"         --> doFloat
-    , className =? "Xfce4-panel"    --> doFloat
+    [ className =? "Psx.real"       --> doFloat
     , className =? "feh"            --> doFloat
-    , title     =? "Downloads"      --> doFloat
     , title     =? "About Aurora"   --> doFloat
-    , className =? "Terminal"       --> doShift "4:terms"
-    , className =? "Gedit"          --> doShift "1:code"
-    , className =? "Emacs"          --> doShift "1:code"
-    , className =? "Komodo Edit"    --> doShift "1:code"
-    , className =? "Emacs"          --> doShift "1:code"
-    , className =? "Gvim"           --> doShift "1:code"
-    , className =? "Aurora"         --> doShift "2:web"
-    , className =? "Pidgin"         --> doShift "3:msg"
-    , className =? "VirtualBox"     --> doShift "9:misc"
-    , className =? "banshee-1"      --> doShift "5:media"
-    , className =? "spotify"        --> doShift "5:media"
-    , className =? "Ktorrent"       --> doShift "5:media"
-    , className =? "Xchat"          --> doShift "5:media"
-    , className =? "Conky"          --> doShift ""
+    , title     =? "MUSIC"          --> doRectFloat (W.RationalRect (1/4) (1/4) (1/2) (1/2))
+    , className =? "Emacs"          --> doShift "I"
+    , className =? "Gvim"           --> doShift "I"
+    , className =? "Eclipse"        --> doShift "I"
+    , className =? "Aurora"         --> doShift "II"
+    , className =? "Pidgin"         --> doShift "III"
+    , className =? "Hexchat"        --> doShift "III"
+    , className =? "Clementine"     --> doShift "V"
+    , className =? "Ario"           --> doShift "V"
+    , className =? "VirtualBox"     --> doShift "IX"
     , resource  =? "desktop_window" --> doIgnore
     , resource  =? "kdesktop"       --> doIgnore 
     , resource  =? "steam"          --> doIgnore
@@ -298,13 +285,13 @@ wrapWorkspaceClickable s = wrap ("^ca(1, xdotool key alt+" ++ (show $ romanToInt
 prettyPrinter :: Handle -> PP
 prettyPrinter h = defaultPP { 
       ppOutput = hPutStrLn h
-    , ppTitle = dzenColor "green" "black" 
-    , ppCurrent = dzenColor "green" "black" . wrapWorkspaceClickable   
-    , ppVisible = dzenColor "yellow" "black" . wrapWorkspaceClickable
-    , ppHidden = dzenColor "orange" "black" . wrapWorkspaceClickable
-    , ppHiddenNoWindows = dzenColor "white" "black" . wrapWorkspaceClickable
-    , ppUrgent = dzenColor "red" "black" . wrapWorkspaceClickable
-    , ppLayout = dzenColor "green" "black" . drop 16
+    , ppTitle = dzenColor foreground background 
+    , ppCurrent = dzenColor "#f5e3d5" background . wrapWorkspaceClickable   
+    , ppVisible = dzenColor "#d4c4b4" background . wrapWorkspaceClickable
+    , ppHidden = dzenColor "#a39383" background . wrapWorkspaceClickable
+    , ppHiddenNoWindows = dzenColor "#716151" background . wrapWorkspaceClickable
+    , ppUrgent = dzenColor "#D23D3D" background . wrapWorkspaceClickable
+    , ppLayout = dzenColor foreground background . drop 16
     , ppOrder = id
     , ppSep = " | "
 }
@@ -344,8 +331,10 @@ main = do
           dzenStatusBar <- spawnPipe myStatusBar
           conky         <- spawnPipe myConky
           statusBar     <- spawnPipe myStatusBar2
+          statusBar3    <- spawnPipe myStatusBar3
+          trayer        <- spawnPipe myTrayer
           xmonad $ defaults {
-            logHook = myLogHook dzenStatusBar >> fadeInactiveLogHook 0xdddddddd
+            logHook = myLogHook dzenStatusBar >> myLogHook statusBar3 >> fadeInactiveLogHook 0xdddddddd
           }
 
 -- A structure containing your configuration settings, overriding

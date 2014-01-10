@@ -15,7 +15,7 @@ track=$(mpc current -f  %title%)
 #next=$(mpc playlist | sed -n ""$nextnum"p")
 #prev=$(mpc playlist | sed -n ""$prevnum"p")
 #art=$(ls ~/.config/ario/covers | grep SMALL | grep $album)
-art="/home/arjun/.config/ario/covers/$(find ~/.config/ario/covers | grep SMALL | grep "$album")"
+art="$(find ~/.config/ario/covers | grep SMALL | grep "$album")"
 perc=`mpc | awk 'NR == 2 {gsub(/[()%]/,""); print $4}'`
  
 percbar=`echo -e "$perc" | gdbar -bg $bar_bg -fg $foreground -h 1 -w $WIDTH`
