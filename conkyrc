@@ -32,7 +32,8 @@ own_window_transparent yes
 double_buffer yes
 
 # Minimum size of text area
-minimum_size 150 1080
+minimum_size 100 1080
+maximum_width 500
 
 # Draw shades?
 draw_shades yes
@@ -79,9 +80,11 @@ pad_percents 3
 # stuff after 'TEXT' will be formatted on screen
 
 TEXT
-${color #ff2323}Weather:$color ${color #f5e5d5}${weather http://weather.noaa.gov/pub/data/observations/metar/stations/ KIAD temperature}F ${weather http://weather.noaa.gov/pub/data/observations/metar/stations/ KIAD cloud_cover}$color
-${color #ffcb48}${time %a %b %d %r %Y}
-${color #ffcb48}$nodename$color      ${color #828282}$sysname $kernel on $machine$color
+${color #716151}${font :size=54}${time %I}${voffset -36}${font :size=16}${time %M}${voffset -8}${font :size=8}${time %S}${voffset 44}
+               ${voffset -36}${time %A} 
+               ${time %d} ${time %b} ${time %Y}
+
+${font :size=9}${color #ffcb48}$nodename$color      ${color #828282}$sysname $kernel on $machine$color
 ${color #ffcb48}Process Stats
     ${color #98c2c7}TOP PROCESSES BY CPU USAGE
     ${color #98c2c7}RANK  NAME                PID       CPU%      MEM%
@@ -101,25 +104,23 @@ ${color #ffcb48}Process Stats
 
 ${color #ffcb48}CPU and RAM$color 
     ${color #98c2c7}Uptime:${color #f5e5d5} $uptime            ${color #98c2c7}Load:$color ${color #716151}${loadavg 1}$color ${color #b3a393}${loadavg 2}$color ${color #f5e5d5}${loadavg 3}$color
-    ${color #98c2c7}CPU 1:${color #f5e5d5} ${cpu cpu1}%   ${color #78af78}${cpugraph cpu1 32afff ff2332 -t} 
-    ${color #98c2c7}CPU 2:${color #f5e5d5} ${cpu cpu2}%   ${color #78af78}${cpugraph cpu2 32afff ff2332 -t}
-    ${color #98c2c7}CPU 3:${color #f5e5d5} ${cpu cpu3}%   ${color #78af78}${cpugraph cpu3 32afff ff2332 -t}
-    ${color #98c2c7}CPU 4:${color #f5e5d5} ${cpu cpu4}%   ${color #78af78}${cpugraph cpu4 32afff ff2332 -t}
-    ${color #98c2c7}CPU 5:${color #f5e5d5} ${cpu cpu5}%   ${color #78af78}${cpugraph cpu5 32afff ff2332 -t}
-    ${color #98c2c7}CPU 6:${color #f5e5d5} ${cpu cpu6}%   ${color #78af78}${cpugraph cpu6 32afff ff2332 -t}
+    ${color #98c2c7}CPU 1:   ${color #f5e5d5}  ${cpu cpu1}%   ${color #78af78}${cpugraph cpu1 32afff ff2332 -t} 
+    ${color #98c2c7}CPU 2:   ${color #f5e5d5}  ${cpu cpu2}%   ${color #78af78}${cpugraph cpu2 32afff ff2332 -t}
+    ${color #98c2c7}CPU 3:   ${color #f5e5d5}  ${cpu cpu3}%   ${color #78af78}${cpugraph cpu3 32afff ff2332 -t}
+    ${color #98c2c7}CPU 4:   ${color #f5e5d5}  ${cpu cpu4}%   ${color #78af78}${cpugraph cpu4 32afff ff2332 -t}
+    ${color #98c2c7}CPU 5:   ${color #f5e5d5}  ${cpu cpu5}%   ${color #78af78}${cpugraph cpu5 32afff ff2332 -t}
+    ${color #98c2c7}CPU 6:   ${color #f5e5d5}  ${cpu cpu6}%   ${color #78af78}${cpugraph cpu6 32afff ff2332 -t}
 
-    ${color #98c2c7}RAM:${color #f5e5d5} $memperc%   $mem/$memmax  ${color #78af78}${membar 6}${color}
+    ${color #98c2c7}RAM:      ${color #f5e5d5} $memperc%   $mem/$memmax  ${color #78af78}${membar 6}${color}
 
 ${color #ffcb48}Network$color 
-    ${color #98c2c7}IP: ${color #afc932}${execpi 3600 checkaddr} (public)$color  ${color #32c9af}${addr enp5s0} (local)$color  
-    ${color #98c2c7}Upload:${color #f5e5d5}    ${upspeed enp5s0}${color #98c2c7} 
-    ${color #78af78}${upspeedgraph eth0 32afff ff2332 -t}
-    Download:${color #f5e5d5}  ${downspeed enp5s0}
-    ${color #78af78}${downspeedgraph eth0 32afff ff2332 -t}
+    ${color #98c2c7}IP: ${color #f5e5d5}${execpi 3600 checkaddr} (public)$color  ${color #b3a393}${addr enp5s0} (local)$color  
+    ${color #98c2c7}Upload:${color #f5e5d5}    ${upspeed enp5s0}${color #98c2c7} ${color #78af78}${upspeedgraph eth0 32afff ff2332 -t}
+    ${color #98c2c7}Download:${color #f5e5d5}  ${downspeed enp5s0} ${color #78af78}${downspeedgraph eth0 32afff ff2332 -t}
 
 ${color #ffcb48}Disk$color 
     ${color #98c2c7}/:${color #f5e5d5} ${fs_used_perc /}%     $fs_used/$fs_size  ${color #78af78}${fs_bar 6 /}$color
-    ${color #98c2c7}Read:${color #f5e5d5}  ${diskio_read /dev/sdc}${color #78af78}${diskiograph_read /dev/sdc 32afff ff2332 -t}
-    ${color #98c2c7}Write:${color #f5e5d5} ${diskio_write /dev/sdc}${color #78af78}${diskiograph_write /dev/sdc 32afff ff2332 -t} 
+    ${color #98c2c7}Read:    ${color #f5e5d5}  ${diskio_read /dev/sdc} ${color #78af78}${diskiograph_read /dev/sdc 32afff ff2332 -t}
+    ${color #98c2c7}Write:   ${color #f5e5d5}  ${diskio_write /dev/sdc} ${color #78af78}${diskiograph_write /dev/sdc 32afff ff2332 -t} 
 
 

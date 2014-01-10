@@ -62,15 +62,15 @@ myFocusedBorderColor = "#eedece"
  
 myStatusBar = "dzen2 -e 'button2=;' -x '0' -y '0' -h '24' -w 2048 -ta 'l' -fg '" ++ foreground ++ "' -bg '" ++ background ++ "' -fn '" ++ myFont ++ "'"
 myConky = "conky"
-myTrayer = "trayer --edge top --align right --SetDockType true --SetPartialStrut true --expand false --width 150 --widthtype pixel --transparent true --tint '" ++ background ++ "' --alpha 0 --height 24"
+myTrayer = "trayer --edge top --align right --SetDockType true --SetPartialStrut true --expand false --width 150 --widthtype request --transparent true --tint '" ++ background ++ "' --alpha 0 --height 24"
 myFont = "xft:Inconsolata-dz for Powerline:size=14"
 background= "#181512"
 foreground= "#D6C3B6"
 myStatusBar2 = "~/.xmonad/status_bar '" ++ foreground ++ "' '" ++ background ++ "' " ++ myFont
-myStatusBar3 = "dzen2 -e 'button2=;' -x '2048' -y '0' -h '24' -w 1100 -ta 'l' -fg '" ++ foreground ++ "' -bg '" ++ background ++ "' -fn '" ++ myFont ++ "'"
+myStatusBar3 = "dzen2 -e 'button2=;' -x '2048' -y '0' -h '24' -w 1050 -ta 'l' -fg '" ++ foreground ++ "' -bg '" ++ background ++ "' -fn '" ++ myFont ++ "'"
 
-splitRatio = 0.755
-conkySplit = screenGo L False >> layoutSplitScreen 2 (TwoPane splitRatio (1 - splitRatio))
+splitRatio = 0.805
+conkySplit = screenGo L False >> layoutSplitScreen 2 (TwoPane splitRatio (1 - splitRatio)) >> screenGo L False >> windows (W.greedyView "") >> screenGo R False
 
 windowSpacing = 20
 
@@ -153,14 +153,14 @@ myKeys conf@(XConfig {XMonad.modMask = modMask}) = M.fromList $
     , ((modMask .|. controlMask .|. shiftMask, xK_space), rescreen)
     , ((modMask .|. shiftMask, xK_b), sendMessage ToggleStruts)
  
-    , ((controlMask,                xK_Up),       spawn "pamixer --increase 5")
-    , ((controlMask,                xK_Down),     spawn "pamixer --decrease 5")
-    , ((controlMask,                xK_space),    spawn "mpc toggle")
-    , ((controlMask,                xK_Right),    spawn "mpc next")
-    , ((controlMask,                xK_Left),     spawn "mpc prev")
-    , ((controlMask .|. shiftMask,  xK_Right),    spawn "mpc seek +5%")
-    , ((controlMask .|. shiftMask,  xK_Left),     spawn "mpc seek -5%")
-    , ((controlMask .|. shiftMask,  xK_Return),   spawn "/home/arjun/bin/music")
+    , ((mod4Mask,                xK_Up),       spawn "pamixer --increase 5")
+    , ((mod4Mask,                xK_Down),     spawn "pamixer --decrease 5")
+    , ((mod4Mask,                xK_space),    spawn "mpc toggle")
+    , ((mod4Mask,                xK_Right),    spawn "mpc next")
+    , ((mod4Mask,                xK_Left),     spawn "mpc prev")
+    , ((mod4Mask .|. shiftMask,  xK_Right),    spawn "mpc seek +5%")
+    , ((mod4Mask .|. shiftMask,  xK_Left),     spawn "mpc seek -5%")
+    , ((mod4Mask .|. shiftMask,  xK_Return),   spawn "/home/arjun/bin/music")
 
     -- Quit xmonad
     , ((modMask .|. shiftMask, xK_q     ), io exitSuccess)
