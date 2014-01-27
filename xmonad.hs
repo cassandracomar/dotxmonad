@@ -1,6 +1,6 @@
--- xmonad config used by Vic Fryzel
--- Author: Vic Fryzel
--- http://github.com/vicfryzel/xmonad-config
+-- xmonad config used by Arjun Comar
+-- Author: Arjun Comar
+-- http://github.com/arjuncomar/dotxmonad
  
 import System.IO
 import System.Exit
@@ -69,7 +69,7 @@ foreground= "#D6C3B6"
 myStatusBar2 = "~/.xmonad/status_bar '" ++ foreground ++ "' '" ++ background ++ "' " ++ myFont
 myStatusBar3 = "dzen2 -e 'button2=;' -x '2048' -y '0' -h '24' -w 1050 -ta 'l' -fg '" ++ foreground ++ "' -bg '" ++ background ++ "' -fn '" ++ myFont ++ "'"
 
-splitRatio = 0.805
+splitRatio = 0.8075
 conkySplit = screenGo L False >> layoutSplitScreen 2 (TwoPane splitRatio (1 - splitRatio)) >> screenGo L False >> windows (W.greedyView "") >> screenGo R False
 
 windowSpacing = 20
@@ -89,16 +89,15 @@ myKeys conf@(XConfig {XMonad.modMask = modMask}) = M.fromList $
     , ((modMask .|. controlMask, xK_l     ), spawn "xscreensaver-command -lock")
 
     -- launch dmenu
-    , ((modMask,               xK_p     ), spawn "export PATH=$HOME/bin:$PATH; dmenu_run")
+    , ((modMask,                xK_p      ), spawn "dmenu_run")
  
-    -- launch gmrun
-    , ((modMask .|. shiftMask, xK_p     ), spawn "gmrun")
- 
+    -- suspend the computer
+    , ((modMask,                xK_s      ), spawn "sudo systemctl suspend")
     -- close focused window 
-    , ((modMask .|. shiftMask, xK_c     ), kill)
+    , ((modMask .|. shiftMask,  xK_c      ), kill)
  
      -- Rotate through the available layout algorithms
-    , ((modMask,               xK_space ), sendMessage NextLayout)
+    , ((modMask,                xK_space  ), sendMessage NextLayout)
  
     --  Reset the layouts on the current workspace to default
     , ((modMask .|. shiftMask, xK_space ), setLayout $ XMonad.layoutHook conf)
@@ -153,14 +152,17 @@ myKeys conf@(XConfig {XMonad.modMask = modMask}) = M.fromList $
     , ((modMask .|. controlMask .|. shiftMask, xK_space), rescreen)
     , ((modMask .|. shiftMask, xK_b), sendMessage ToggleStruts)
  
-    , ((mod4Mask,                xK_Up),       spawn "pamixer --increase 5")
-    , ((mod4Mask,                xK_Down),     spawn "pamixer --decrease 5")
-    , ((mod4Mask,                xK_space),    spawn "mpc toggle")
-    , ((mod4Mask,                xK_Right),    spawn "mpc next")
-    , ((mod4Mask,                xK_Left),     spawn "mpc prev")
-    , ((mod4Mask .|. shiftMask,  xK_Right),    spawn "mpc seek +5%")
-    , ((mod4Mask .|. shiftMask,  xK_Left),     spawn "mpc seek -5%")
-    , ((mod4Mask .|. shiftMask,  xK_Return),   spawn "/home/arjun/bin/music")
+    , ((mod4Mask,                 xK_Up),       spawn "pamixer --increase 5")
+    , ((mod4Mask,                 xK_Down),     spawn "pamixer --decrease 5")
+    , ((mod4Mask,                 xK_space),    spawn "mpc toggle")
+    , ((mod4Mask,                 xK_Right),    spawn "mpc next")
+    , ((mod4Mask,                 xK_Left),     spawn "mpc prev")
+    , ((mod4Mask .|. shiftMask,   xK_Right),    spawn "mpc seek +5%")
+    , ((mod4Mask .|. shiftMask,   xK_Left),     spawn "mpc seek -5%")
+    , ((mod4Mask,                 xK_Return),   spawn "/home/arjun/bin/music")
+
+    , ((mod4Mask,                 xK_f),        spawn "lxterminal -t 'FILES' -e '/usr/bin/ranger'")
+    , ((mod4Mask,                 xK_i),        spawn "lxterminal -t 'IRC' -e '/home/arjun/bin/connect-irssi'")
 
     -- Quit xmonad
     , ((modMask .|. shiftMask, xK_q     ), io exitSuccess)
@@ -222,7 +224,7 @@ myTabConfig = defaultTheme {   activeBorderColor = "#7C7C7C"
                              , inactiveBorderColor = "#7C7C7C"
                              , inactiveTextColor = "#EEEEEE"
                              , inactiveColor = "#000000" }
-myLayout = (smartSpacing windowSpacing . windowNavigation $ tiled ||| Mirror tiled |||  Full ||| spiral ratio3 ||| ThreeColMid nmaster delta ratio ) ||| (windowNavigation $ tabbed shrinkText myTabConfig ||| tabbed shrinkText myTabConfig  **|*** Mirror tiled2)
+myLayout = (smartSpacing windowSpacing . windowNavigation $ tiled ||| Mirror tiled |||  Full ||| spiral ratio3 ||| ThreeColMid nmaster delta ratio ) ||| windowNavigation (tabbed shrinkText myTabConfig ||| tabbed shrinkText myTabConfig  **|*** Mirror tiled2)
   where
      -- default tiling algorithm partitions the screen into two panes
      tiled   = Tall nmaster delta ratio
@@ -255,24 +257,30 @@ myLayout = (smartSpacing windowSpacing . windowNavigation $ tiled ||| Mirror til
 -- 'className' and 'resource' are used below.
 --
 myManageHook = composeAll
-    [ className =? "Psx.real"       --> doFloat
-    , className =? "feh"            --> doFloat
-    , title     =? "About Aurora"   --> doFloat
-    , title     =? "MUSIC"          --> doRectFloat (W.RationalRect (1/4) (1/4) (1/2) (1/2))
-    , className =? "Emacs"          --> doShift "I"
-    , className =? "Gvim"           --> doShift "I"
-    , className =? "Eclipse"        --> doShift "I"
-    , className =? "Aurora"         --> doShift "II"
-    , className =? "Pidgin"         --> doShift "III"
-    , className =? "Hexchat"        --> doShift "III"
-    , className =? "Clementine"     --> doShift "V"
-    , className =? "Ario"           --> doShift "V"
-    , className =? "VirtualBox"     --> doShift "IX"
-    , resource  =? "desktop_window" --> doIgnore
-    , resource  =? "kdesktop"       --> doIgnore 
-    , resource  =? "steam"          --> doIgnore
-    , className =? "Firefox"        --> doShift "2:web"
-    , isFullscreen                  --> (doF W.focusDown <+> doFullFloat) 
+    [ className =? "Psx.real"                 --> doFloat
+    , className =? "feh"                      --> doFloat
+    , title     =? "About Aurora"             --> doFloat
+    , title     =? "Software Update"          --> doFloat
+    , title     =? "Rename Bookmark Item"     --> doRectFloat (W.RationalRect (3/8) (7/16) (1/4) (1/8))
+    , title     =? "MUSIC"                    --> doRectFloat (W.RationalRect (1/4) (1/4) (1/2) (1/2))
+    , title     =? "FILES"                    --> doRectFloat (W.RationalRect (1/4) (1/4) (1/2) (1/2))
+    , title     =? "Print"                    --> doRectFloat (W.RationalRect (1/4) (1/4) (1/2) (1/2))
+    , title     =? "HexChat: Network List"    --> doRectFloat (W.RationalRect (3/8) (1/4) (1/4) (1/2))
+    , title     =? "IRC"                      --> doShift "III"
+    , className =? "Emacs"                    --> doShift "I"
+    , className =? "Gvim"                     --> doShift "I"
+    , className =? "Eclipse"                  --> doShift "I"
+    , className =? "Aurora"                   --> doShift "II"
+    , className =? "Firefox"                  --> doShift "II"
+    , className =? "Pidgin"                   --> doShift "III"
+    , className =? "Hexchat"                  --> doShift "III"
+    , className =? "Clementine"               --> doShift "V"
+    , className =? "Ario"                     --> doShift "V"
+    , className =? "VirtualBox"               --> doShift "IX"
+    , resource  =? "desktop_window"           --> doIgnore
+    , resource  =? "kdesktop"                 --> doIgnore 
+    , resource  =? "steam"                    --> doIgnore
+    , isFullscreen                            --> (doF W.focusDown <+> doFullFloat) 
     ] 
  
 -- Whether focus follows the mouse pointer.
@@ -280,7 +288,7 @@ myFocusFollowsMouse :: Bool
 myFocusFollowsMouse = True
  
 wrapWorkspaceClickable :: String -> String
-wrapWorkspaceClickable s = wrap ("^ca(1, xdotool key alt+" ++ (show $ romanToInt s) ++ ")") "^ca()" s
+wrapWorkspaceClickable s = wrap ("^ca(1, xdotool key alt+" ++ show (romanToInt s) ++ ")") "^ca()" s
 
 prettyPrinter :: Handle -> PP
 prettyPrinter h = defaultPP { 
@@ -297,8 +305,7 @@ prettyPrinter h = defaultPP {
 }
 
 romanToInt :: String -> Int
-romanToInt = fst . foldr (\p (t,s) -> if p >= s then (t+p,p) else (t-p,p)) (0,0)
-              . map (fromJust . flip lookup (zip "IVXLCDM" [1,5,10,50,100,500,1000]))
+romanToInt = fst . foldr ((\p (t,s) -> if p >= s then (t+p,p) else (t-p,p)) . fromJust . flip lookup (zip "IVXLCDM" [1,5,10,50,100,500,1000]))  (0,0)
 ------------------------------------------------------------------------
 -- Status bars and logging
  
