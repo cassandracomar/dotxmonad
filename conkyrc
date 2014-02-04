@@ -84,41 +84,41 @@ ${color #716151}${font :size=48}${time %I}${voffset -40}${font :size=8} ${font :
               ${time %A} 
               ${time %d} ${time %b} ${time %Y}
 
-${font :size=9}${color #ffcb48}$nodename$color      ${color #828282}$sysname $kernel on $machine$color
-${color #ffcb48}Process Stats
-    ${color #98c2c7}TOP PROCESSES BY CPU USAGE
-    ${color #98c2c7}RANK  NAME                PID       CPU%      MEM%
+${font :size=9}${color #f0c0a0}$nodename$color      ${color #928272}$sysname $kernel on $machine$color
+${color #f0c0a0}Process Stats
+    ${color #a89f88}TOP PROCESSES BY CPU USAGE
+    ${color #a89f88}RANK  NAME                PID       CPU%      MEM%
     ${color #f5e5d5}1     ${top name 1}    ${top pid 1}   ${top cpu 1}    ${top mem 1}
     ${color #d4c4b4}2     ${top name 2}    ${top pid 2}   ${top cpu 2}    ${top mem 2}
     ${color #b3a393}3     ${top name 3}    ${top pid 3}   ${top cpu 3}    ${top mem 3}
     ${color #928272}4     ${top name 4}    ${top pid 4}   ${top cpu 4}    ${top mem 4}
     ${color #716151}5     ${top name 5}    ${top pid 5}   ${top cpu 5}    ${top mem 5}
 
-    ${color #98c2c7}TOP PROCESSES BY MEM USAGE
-    ${color #98c2c7}RANK  NAME               PID       CPU%      MEM%
+    ${color #a89f88}TOP PROCESSES BY MEM USAGE
+    ${color #a89f88}RANK  NAME               PID       CPU%      MEM%
     ${color #f5e5d5}1     ${top_mem name 1}   ${top_mem pid 1}   ${top_mem cpu 1}    ${top_mem mem 1}
     ${color #d4c4b4}2     ${top_mem name 2}   ${top_mem pid 2}   ${top_mem cpu 2}    ${top_mem mem 2}
     ${color #b3a393}3     ${top_mem name 3}   ${top_mem pid 3}   ${top_mem cpu 3}    ${top_mem mem 3}
     ${color #928272}4     ${top_mem name 4}   ${top_mem pid 4}   ${top_mem cpu 4}    ${top_mem mem 4}
     ${color #716151}5     ${top_mem name 5}   ${top_mem pid 5}   ${top_mem cpu 5}    ${top_mem mem 5}
 
-${color #ffcb48}CPU and RAM$color 
-    ${color #98c2c7}Uptime:${color #f5e5d5} $uptime            ${color #98c2c7}Load:$color ${color #716151}${loadavg 1}$color ${color #b3a393}${loadavg 2}$color ${color #f5e5d5}${loadavg 3}$color
-    ${color #98c2c7}CPU 1:    ${color #f5e5d5}  ${cpu cpu1}%   ${color #78af78}${cpugraph cpu1 32afff ff2332 -t} 
-    ${color #98c2c7}CPU 2:    ${color #f5e5d5}  ${cpu cpu2}%   ${color #78af78}${cpugraph cpu2 32afff ff2332 -t}
-    ${color #98c2c7}CPU 3:    ${color #f5e5d5}  ${cpu cpu3}%   ${color #78af78}${cpugraph cpu3 32afff ff2332 -t}
-    ${color #98c2c7}CPU 4:    ${color #f5e5d5}  ${cpu cpu4}%   ${color #78af78}${cpugraph cpu4 32afff ff2332 -t}
-    ${color #98c2c7}CPU 5:    ${color #f5e5d5}  ${cpu cpu5}%   ${color #78af78}${cpugraph cpu5 32afff ff2332 -t}
-    ${color #98c2c7}CPU 6:    ${color #f5e5d5}  ${cpu cpu6}%   ${color #78af78}${cpugraph cpu6 32afff ff2332 -t}
+${color #f0c0a0}CPU and RAM$color 
+    ${color #a89f88}Uptime:${color #f5e5d5} $uptime            ${color #a89f88}Load:$color ${color #716151}${loadavg 1}$color ${color #b3a393}${loadavg 2}$color ${color #f5e5d5}${loadavg 3}$color
+    ${color #a89f88}CPU 1:    ${color #f5e5d5}  ${cpu cpu1}%   ${color #a89288}${cpugraph cpu1 716151 f5e5d5 -t} 
+    ${color #a89f88}CPU 2:    ${color #f5e5d5}  ${cpu cpu2}%   ${color #a89f88}${cpugraph cpu2 716151 f5e5d5 -t}
+    ${color #a89f88}CPU 3:    ${color #f5e5d5}  ${cpu cpu3}%   ${color #a89f88}${cpugraph cpu3 716151 f5e5d5 -t}
+    ${color #a89f88}CPU 4:    ${color #f5e5d5}  ${cpu cpu4}%   ${color #a89f88}${cpugraph cpu4 716151 f5e5d5 -t}
+    ${color #a89f88}CPU 5:    ${color #f5e5d5}  ${cpu cpu5}%   ${color #a89f88}${cpugraph cpu5 716151 f5e5d5 -t}
+    ${color #a89f88}CPU 6:    ${color #f5e5d5}  ${cpu cpu6}%   ${color #a89f88}${cpugraph cpu6 716151 f5e5d5 -t}
 
-    ${color #98c2c7}RAM:      ${color #f5e5d5}  $memperc%   $mem/$memmax  ${color #78af78}${membar 6}${color}
+    ${color #a89f88}RAM:      ${color #f5e5d5}  $memperc%   $mem/$memmax  ${color #a89f88}${membar 6}${color}
 
-${color #ffcb48}Network$color 
-    ${color #98c2c7}IP: ${color #f5e5d5}${execpi 3600 checkaddr} (public)$color  ${color #b3a393}${addr enp5s0} (local)$color  
-    ${color #98c2c7}Upload:${color #f5e5d5}    ${upspeed enp5s0}${color #98c2c7} ${color #78af78}${upspeedgraph eth0 32afff ff2332 -t}
-    ${color #98c2c7}Download:${color #f5e5d5}  ${downspeed enp5s0} ${color #78af78}${downspeedgraph eth0 32afff ff2332 -t}
+${color #f0c0a0}Network$color 
+    ${color #a89f88}IP: ${color #f5e5d5}${execpi 3600 checkaddr} (public)$color  ${color #b3a393}${addr enp5s0} (local)$color  
+    ${color #a89f88}Upload:${color #f5e5d5}    ${upspeed enp5s0}${color #a89f88} ${color #a89f88}${upspeedgraph eth0 716151 f5e5d5 -t}
+    ${color #a89f88}Download:${color #f5e5d5}  ${downspeed enp5s0} ${color #a89f88}${downspeedgraph eth0 716151 f5e5d5 -t}
 
-${color #ffcb48}Disk$color 
-    ${color #98c2c7}/:${color #f5e5d5} ${fs_used_perc /}%     $fs_used/$fs_size  ${color #78af78}${fs_bar 6 /}$color
-    ${color #98c2c7}Read:    ${color #f5e5d5}  ${diskio_read /dev/sdc} ${color #78af78}${diskiograph_read /dev/sdc 32afff ff2332 -t}
-    ${color #98c2c7}Write:   ${color #f5e5d5}  ${diskio_write /dev/sdc} ${color #78af78}${diskiograph_write /dev/sdc 32afff ff2332 -t} 
+${color #f0c0a0}Disk$color 
+    ${color #a89f88}/:${color #f5e5d5} ${fs_used_perc /}%     $fs_used/$fs_size  ${color #a89f88}${fs_bar 6 /}$color
+    ${color #a89f88}Read:    ${color #f5e5d5}  ${diskio_read /dev/sdc} ${color #a89f88}${diskiograph_read /dev/sdc 716151 f5e5d5 -t}
+    ${color #a89f88}Write:   ${color #f5e5d5}  ${diskio_write /dev/sdc} ${color #a89f88}${diskiograph_write /dev/sdc 716151 f5e5d5 -t} 

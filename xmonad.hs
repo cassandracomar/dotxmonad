@@ -11,10 +11,9 @@ import XMonad.Hooks.SetWMName
 import XMonad.Hooks.InsertPosition
 import XMonad.Hooks.FadeInactive
 import XMonad.Layout.NoBorders
-import XMonad.Layout.Spiral
 import XMonad.Layout.Tabbed
-import XMonad.Layout.ThreeColumns
 import XMonad.Layout.TwoPane
+import XMonad.Layout.IM
 import XMonad.Util.Run
 import XMonad.Config.Xfce
 import XMonad.Hooks.ManageHelpers
@@ -141,9 +140,7 @@ myKeys conf@(XConfig {XMonad.modMask = modMask}) = M.fromList $
     -- Deincrement the number of windows in the master area
     , ((modMask              , xK_period), sendMessage (IncMasterN (-1)))
  
-    , ((modMask .|. controlMask, xK_f   ), sendMessage $ JumpToLayout "Full")
-    , ((modMask .|. controlMask, xK_t   ), sendMessage $ JumpToLayout "ThreeCol")
-    , ((modMask .|. controlMask, xK_b   ), sendMessage $ JumpToLayout "Tabbed Simplest")
+    , ((modMask .|. controlMask, xK_b   ), sendMessage $ JumpToLayout "IM Tabbed Simplest")
     , ((modMask .|. controlMask, xK_Up), sendMessage $ Move U)
     , ((modMask .|. controlMask, xK_Down), sendMessage $ Move D)
     , ((modMask .|. controlMask, xK_Right), sendMessage $ Move R)
@@ -160,6 +157,8 @@ myKeys conf@(XConfig {XMonad.modMask = modMask}) = M.fromList $
     , ((mod4Mask .|. shiftMask,   xK_Right),    spawn "mpc seek +5%")
     , ((mod4Mask .|. shiftMask,   xK_Left),     spawn "mpc seek -5%")
     , ((mod4Mask,                 xK_Return),   spawn "/home/arjun/bin/music")
+    , ((mod4Mask,                 xK_b),        spawn "/home/arjun/bin/launch-dwb")
+    , ((modMask,                  xK_m),        spawn "mpdmenu")
 
     , ((mod4Mask,                 xK_f),        spawn "lxterminal -t 'FILES' -e '/usr/bin/ranger'")
     , ((mod4Mask,                 xK_i),        spawn "lxterminal -t 'IRC' -e '/home/arjun/bin/connect-irssi'")
@@ -218,28 +217,36 @@ myMouseBindings (XConfig {XMonad.modMask = modMask}) = M.fromList
 -- The available layouts.  Note that each layout is separated by |||,
 -- which denotes layout choice.
 --
-myTabConfig = defaultTheme {   activeBorderColor = "#7C7C7C"
-                             , activeTextColor = "#CEFFAC"
-                             , activeColor = "#000000"
-                             , inactiveBorderColor = "#7C7C7C"
-                             , inactiveTextColor = "#EEEEEE"
-                             , inactiveColor = "#000000" }
-myLayout = (smartSpacing windowSpacing . windowNavigation $ tiled ||| Mirror tiled |||  Full ||| spiral ratio3 ||| ThreeColMid nmaster delta ratio ) ||| windowNavigation (tabbed shrinkText myTabConfig ||| tabbed shrinkText myTabConfig  **|*** Mirror tiled2)
+myTabConfig = defaultTheme {   activeBorderColor = myFocusedBorderColor
+                             , activeTextColor = foreground
+                             , activeColor = background
+                             , inactiveBorderColor = myNormalBorderColor
+                             , inactiveTextColor = "#a39383"
+                             , inactiveColor = background }
+myLayout = withMyIM $ spacedLayout ||| tabbedLayout ||| codingLayout
   where
-     -- default tiling algorithm partitions the screen into two panes
-     tiled   = Tall nmaster delta ratio
-     tiled2  = Tall nmaster delta ratio2
+    -- default tiling algorithm partitions the screen into two panes
+    tiled   = Tall nmaster delta ratio
+    tiled2  = Tall nmaster delta ratio2
  
-     -- The default number of windows in the master pane
-     nmaster = 1
+    -- The default number of windows in the master pane
+    nmaster = 1
  
-     -- Default proportion of screen occupied by master pane
-     ratio   = 1/2
-     ratio2  = 7/8
-     ratio3  = 6/7
+    -- Default proportion of screen occupied by master pane
+    ratio   = 1/2
+    ratio2  = 7/8
  
-     -- Percent of screen to increment by when resizing panes
-     delta   = 3/100
+    -- Percent of screen to increment by when resizing panes
+    delta   = 3/100
+
+    -- IM Pane size
+    imratio = 3/16
+    withMyIM = withIM imratio (Title "Buddy List")
+
+    -- Layout pieces
+    spacedLayout = smartSpacing windowSpacing . windowNavigation $ tiled 
+    tabbedLayout = windowNavigation $ tabbed shrinkText myTabConfig
+    codingLayout = windowNavigation $ Mirror tiled2 ****|*** tabbed shrinkText myTabConfig 
  
 ------------------------------------------------------------------------
 -- Window rules:
@@ -270,8 +277,8 @@ myManageHook = composeAll
     , className =? "Emacs"                    --> doShift "I"
     , className =? "Gvim"                     --> doShift "I"
     , className =? "Eclipse"                  --> doShift "I"
-    , className =? "Aurora"                   --> doShift "II"
-    , className =? "Firefox"                  --> doShift "II"
+    , className =? "Aurora"                   --> doShift "VIII"
+    , className =? "Firefox"                  --> doShift "VIII"
     , className =? "Pidgin"                   --> doShift "III"
     , className =? "Hexchat"                  --> doShift "III"
     , className =? "Clementine"               --> doShift "V"
@@ -299,13 +306,19 @@ prettyPrinter h = defaultPP {
     , ppHidden = dzenColor "#a39383" background . wrapWorkspaceClickable
     , ppHiddenNoWindows = dzenColor "#716151" background . wrapWorkspaceClickable
     , ppUrgent = dzenColor "#D23D3D" background . wrapWorkspaceClickable
-    , ppLayout = dzenColor foreground background . drop 16
+    , ppLayout = dzenColor foreground background . fixLayoutName
     , ppOrder = id
     , ppSep = " | "
 }
 
 romanToInt :: String -> Int
 romanToInt = fst . foldr ((\p (t,s) -> if p >= s then (t+p,p) else (t-p,p)) . fromJust . flip lookup (zip "IVXLCDM" [1,5,10,50,100,500,1000]))  (0,0)
+
+fixLayoutName :: String -> String
+fixLayoutName "IM SmartSpacing 20 Tall" = "Tall"
+fixLayoutName "IM Tabbed Simplest" = "Tabbed"
+fixLayoutName "IM combining Mirror Tall and Tabbed Simplest with Tall" = "Coding"
+fixLayoutName s = s
 ------------------------------------------------------------------------
 -- Status bars and logging
  
