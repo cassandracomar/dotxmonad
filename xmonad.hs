@@ -22,6 +22,7 @@ import XMonad.Layout.LayoutScreens
 import XMonad.Layout.WindowNavigation
 import XMonad.Actions.Navigation2D
 import XMonad.Layout.Spacing
+import XMonad.Layout.PerWorkspace
 
 import qualified XMonad.StackSet as W
 import qualified Data.Map        as M
@@ -81,14 +82,10 @@ myKeys conf@(XConfig {XMonad.modMask = modMask}) = M.fromList $
     -- launch a terminal
     [ ((modMask .|. shiftMask, xK_Return), spawn $ XMonad.terminal conf)
     
-    -- launch file browser
-    , ((modMask .|. controlMask, xK_Return), spawn "thunar")
-
-    -- launch gmrun
     , ((modMask .|. controlMask, xK_l     ), spawn "xscreensaver-command -lock")
 
     -- launch dmenu
-    , ((modMask,                xK_p      ), spawn "dmenu_run")
+    , ((modMask,                xK_p      ), spawn "yeganesh -x | zsh")
  
     -- suspend the computer
     , ((modMask,                xK_s      ), spawn "sudo systemctl suspend")
@@ -218,12 +215,12 @@ myMouseBindings (XConfig {XMonad.modMask = modMask}) = M.fromList
 -- which denotes layout choice.
 --
 myTabConfig = defaultTheme {   activeBorderColor = myFocusedBorderColor
-                             , activeTextColor = foreground
-                             , activeColor = background
-                             , inactiveBorderColor = myNormalBorderColor
-                             , inactiveTextColor = "#a39383"
-                             , inactiveColor = background }
-myLayout = withMyIM $ spacedLayout ||| tabbedLayout ||| codingLayout
+                            , activeTextColor = foreground
+                            , activeColor = background
+                            , inactiveBorderColor = myNormalBorderColor
+                            , inactiveTextColor = "#a39383"
+                            , inactiveColor = background }
+myLayout = modifySpecifics $ tabbedLayout ||| spacedLayout ||| codingLayout 
   where
     -- default tiling algorithm partitions the screen into two panes
     tiled   = Tall nmaster delta ratio
@@ -247,6 +244,12 @@ myLayout = withMyIM $ spacedLayout ||| tabbedLayout ||| codingLayout
     spacedLayout = smartSpacing windowSpacing . windowNavigation $ tiled 
     tabbedLayout = windowNavigation $ tabbed shrinkText myTabConfig
     codingLayout = windowNavigation $ Mirror tiled2 ****|*** tabbed shrinkText myTabConfig 
+
+    -- Workspace-specific layouts.
+    imWorkspace = onWorkspace "III" $ withMyIM tabbedLayout
+    codingWorkspace = onWorkspace "I" codingLayout
+    terminalWorkspace = onWorkspace "IV" spacedLayout
+    modifySpecifics = imWorkspace . codingWorkspace . terminalWorkspace
  
 ------------------------------------------------------------------------
 -- Window rules:
@@ -277,8 +280,8 @@ myManageHook = composeAll
     , className =? "Emacs"                    --> doShift "I"
     , className =? "Gvim"                     --> doShift "I"
     , className =? "Eclipse"                  --> doShift "I"
-    , className =? "Aurora"                   --> doShift "VIII"
-    , className =? "Firefox"                  --> doShift "VIII"
+    , className =? "Aurora"                   --> doShift "II"
+    , className =? "Firefox"                  --> doShift "II"
     , className =? "Pidgin"                   --> doShift "III"
     , className =? "Hexchat"                  --> doShift "III"
     , className =? "Clementine"               --> doShift "V"
@@ -318,6 +321,9 @@ fixLayoutName :: String -> String
 fixLayoutName "IM SmartSpacing 20 Tall" = "Tall"
 fixLayoutName "IM Tabbed Simplest" = "Tabbed"
 fixLayoutName "IM combining Mirror Tall and Tabbed Simplest with Tall" = "Coding"
+fixLayoutName "SmartSpacing 20 Tall" = "Tall"
+fixLayoutName "Tabbed Simplest" = "Tabbed"
+fixLayoutName "combining Mirror Tall and Tabbed Simplest with Tall" = "Coding"
 fixLayoutName s = s
 ------------------------------------------------------------------------
 -- Status bars and logging
