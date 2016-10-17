@@ -23,6 +23,7 @@ import XMonad.Layout.WindowNavigation
 import XMonad.Actions.Navigation2D
 import XMonad.Layout.Spacing
 import XMonad.Layout.PerWorkspace
+import XMonad.Util.EZConfig
 
 import qualified XMonad.StackSet as W
 import qualified Data.Map        as M
@@ -60,13 +61,13 @@ myWorkspaces    = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", ""]
 myNormalBorderColor  = "#3c2c1c"
 myFocusedBorderColor = "#eedece"
  
-myStatusBar = "dzen2 -e 'button2=;' -x '0' -y '0' -h '24' -w 2048 -ta 'l' -fg '" ++ foreground ++ "' -bg '" ++ background ++ "' -fn '" ++ myFont ++ "'"
+myStatusBar = "dzen2 -e 'button2=;' -x '0' -y '0' -h '40' -w 2770 -ta 'l' -fg '" ++ foreground ++ "' -bg '" ++ background ++ "' -fn '" ++ myFont ++ "'"
 myConky = "conky"
-myTrayer = "trayer --edge top --align right --SetDockType true --SetPartialStrut true --expand false --width 150 --widthtype request --transparent true --tint '" ++ background ++ "' --alpha 0 --height 24"
-myFont = "xft:Inconsolata-dz for Powerline:size=14"
+myTrayer = "trayer --edge top --align right --SetDockType true --SetPartialStrut true --expand false --width 150 --widthtype request --transparent true --tint '" ++ background ++ "' --alpha 0 --height 40"
+myFont = "xft:Inconsolata for Powerline:Medium:size=9"
 background= "#181512"
 foreground= "#D6C3B6"
-myStatusBar2 = "~/.xmonad/status_bar '" ++ foreground ++ "' '" ++ background ++ "' " ++ myFont
+myStatusBar2 = "~/.xmonad/status_bar '" ++ foreground ++ "' '" ++ background ++ "' '" ++ myFont ++ "'"
 myStatusBar3 = "dzen2 -e 'button2=;' -x '2048' -y '0' -h '24' -w 1050 -ta 'l' -fg '" ++ foreground ++ "' -bg '" ++ background ++ "' -fn '" ++ myFont ++ "'"
 
 splitRatio = 0.8075
@@ -335,7 +336,7 @@ fixLayoutName s = s
 --
 -- > logHook = dynamicLogDzen
 --
-myLogHook h = dynamicLogWithPP $ prettyPrinter h
+myLogHook = dynamicLogWithPP . prettyPrinter
  
 ------------------------------------------------------------------------
 -- Startup hook
@@ -345,7 +346,7 @@ myLogHook h = dynamicLogWithPP $ prettyPrinter h
 -- per-workspace layout choices.
 --
 -- By default, do nothing.
-myStartupHook = rescreen >> conkySplit >> setWMName "LG3D"
+myStartupHook = setWMName "LG3D"
  
 ------------------------------------------------------------------------
 -- Now run xmonad with all the defaults we set up.
@@ -355,12 +356,12 @@ myStartupHook = rescreen >> conkySplit >> setWMName "LG3D"
 main :: IO ()
 main = do 
           dzenStatusBar <- spawnPipe myStatusBar
-          conky         <- spawnPipe myConky
+--          conky         <- spawnPipe myConky
           statusBar     <- spawnPipe myStatusBar2
-          statusBar3    <- spawnPipe myStatusBar3
+--          statusBar3    <- spawnPipe myStatusBar3
           trayer        <- spawnPipe myTrayer
           xmonad $ defaults {
-            logHook = myLogHook dzenStatusBar >> myLogHook statusBar3 >> fadeInactiveLogHook 0xdddddddd
+            logHook = myLogHook dzenStatusBar >> fadeInactiveLogHook 0xdddddddd
           }
 
 -- A structure containing your configuration settings, overriding
@@ -385,7 +386,16 @@ defaults = xfceConfig {
         layoutHook         = avoidStruts . smartBorders $ myLayout,
         manageHook         = manageDocks <+> insertPosition Above Newer <+> myManageHook ,
         startupHook        = myStartupHook 
-    }
+    } `additionalKeysP` [
+      ("<XF86MonBrightnessDown>", spawn "backlight.sh -c down")
+    , ("<XF86MonBrightnessUp>",   spawn "backlight.sh -c up")
+    , ("<XF86AudioMute>",         spawn "vol.sh -c mute")
+    , ("<XF86AudioLowerVolume>",  spawn "vol.sh -c down")
+    , ("<XF86AudioRaiseVolume>",  spawn "vol.sh -c up")
+    , ("<XF86AudioPrev>",         spawn "mpc prev")
+    , ("<XF86AudioPlay>",         spawn "mpc toggle")
+    , ("<XF86AudioNext>",         spawn "mpc next")
+    ]
 
 ------------------------------------------------------------------------
 

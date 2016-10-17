@@ -9,7 +9,6 @@ temperature_unit fahrenheit
  
 TEXT
 ^ca(1,/home/arjun/.xmonad/sc /home/arjun/.xmonad/scripts/dzen_log.sh)^fg(\#626262)^i(/home/arjun/.xmonad/dzen2/info_03.xbm)^fg(\#bea492)    ^ca()\
-${weather http://weather.noaa.gov/pub/data/observations/metar/stations/ KFME temperature}F ${weather http://weather.noaa.gov/pub/data/observations/metar/stations/ KFME cloud_cover}   \
 ^ca(1,/home/arjun/.xmonad/sc /home/arjun/.xmonad/scripts/dzen_music.sh)$if_mpd_playing^fg(\#636e74)^i(/home/arjun/.xmonad/dzen2/note.xbm) ^fg(\#bea492)${mpd_artist}   ^ca()\
 ^ca(1,/home/arjun/.xmonad/sc /home/arjun/.xmonad/scripts/dzen_vol.sh)   ^fg(\#636e74)${execi 2 /home/arjun/.xmonad/scripts/bar_vol.sh}^fg(\#bea492)   ^ca()\
 ^ca(1,/home/arjun/.xmonad/scripts/dzen_pacman.sh)  ^fg(\#636e74)^i(/home/arjun/.xmonad/dzen2/pacman.xbm) ^fg(\#bea492)${exec pacman -Qu | wc -l} updates  ^ca()\
