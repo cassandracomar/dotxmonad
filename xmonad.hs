@@ -61,7 +61,7 @@ myWorkspaces    = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", ""]
 myNormalBorderColor  = "#3c2c1c"
 myFocusedBorderColor = "#eedece"
  
-myStatusBar = "dzen2 -e 'button2=;' -x '0' -y '0' -h '40' -w 2770 -ta 'l' -fg '" ++ foreground ++ "' -bg '" ++ background ++ "' -fn '" ++ myFont ++ "'"
+myStatusBar = "dzen2 -e 'button2=;' -x '0' -y '0' -h '40' -w 2310 -ta 'l' -fg '" ++ foreground ++ "' -bg '" ++ background ++ "' -fn '" ++ myFont ++ "'"
 myConky = "conky"
 myTrayer = "trayer --edge top --align right --SetDockType true --SetPartialStrut true --expand false --width 150 --widthtype request --transparent true --tint '" ++ background ++ "' --alpha 0 --height 40"
 myFont = "xft:Inconsolata for Powerline:Medium:size=9"
@@ -387,14 +387,14 @@ defaults = xfceConfig {
         manageHook         = manageDocks <+> insertPosition Above Newer <+> myManageHook ,
         startupHook        = myStartupHook 
     } `additionalKeysP` [
-      ("<XF86MonBrightnessDown>", spawn "backlight.sh -c down")
-    , ("<XF86MonBrightnessUp>",   spawn "backlight.sh -c up")
-    , ("<XF86AudioMute>",         spawn "vol.sh -c mute")
-    , ("<XF86AudioLowerVolume>",  spawn "vol.sh -c down")
-    , ("<XF86AudioRaiseVolume>",  spawn "vol.sh -c up")
-    , ("<XF86AudioPrev>",         spawn "mpc prev")
-    , ("<XF86AudioPlay>",         spawn "mpc toggle")
-    , ("<XF86AudioNext>",         spawn "mpc next")
+      ("<XF86MonBrightnessDown>", spawn "backlight-adj.sh down")
+    , ("<XF86MonBrightnessUp>",   spawn "backlight-adj.sh up")
+    , ("<XF86AudioMute>",         spawn "volume-adj.sh mute")
+    , ("<XF86AudioLowerVolume>",  spawn "volume-adj.sh down")
+    , ("<XF86AudioRaiseVolume>",  spawn "volume-adj.sh up")
+    , ("<XF86AudioPrev>",         spawn "playerctl previous")
+    , ("<XF86AudioPlay>",         spawn "playerctl play-pause")
+    , ("<XF86AudioNext>",         spawn "playerctl next")
     ]
 
 ------------------------------------------------------------------------
