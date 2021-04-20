@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 source $(dirname $0)/config.sh
 XPOS=$((1600 + $XOFFSET))
 WIDTH="150"

@@ -1,0 +1,23 @@
+-- This file has been generated from package.yaml by hpack version 0.28.2.
+--
+-- see: https://github.com/sol/hpack
+--
+-- hash: 605e1b99861ba4da9aacfd198c2743511b93c6f64030befd6cd50c7af7c04594
+
+name: xmonad-personal
+version:        0.0.0
+license-file:   LICENSE
+build-type:     Simple
+cabal-version:  >= 1.10
+
+executable xmonad
+    main-is: xmonad.hs
+    build-depends:
+        base >=4.12 && <5,
+        containers,
+        xmonad,
+        xmonad-contrib,
+        data-default,
+        X11
+
+nix: True

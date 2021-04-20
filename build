@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+BIN=$1
+[[ -n $BIN ]] || BIN=xmonad
+
+stack install --nix --local-bin-path $PWD
+
+[[ -f $BIN ]] || ln -s xmonad $BIN
