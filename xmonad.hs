@@ -1,8 +1,7 @@
-{-# LANGUAGE ViewPatterns #-}
-
 -- xmonad config used by Cassandra Comar
 -- Author: Cassandra Comar
 -- http://github.com/cassandracomar/dotxmonad
+{-# LANGUAGE ViewPatterns #-}
 
 import Control.Concurrent
 import Control.Monad
@@ -76,7 +75,11 @@ background = "#181512"
 
 foreground = "#D6C3B6"
 
-myStatusBar sid horiz = "~/.xmonad/status_bar '" ++ foreground ++ "' '" ++ background ++ "' '" ++ myFont ++ "' '" ++ show (horiz + 2823) ++ "' &trayer --edge top --align right --SetDockType true --SetPartialStrut true --expand false --width 150 --widthtype request --transparent true --tint '" ++ background ++ "' --alpha 0 --height 40 --monitor '" ++ show sid ++ "' & dzen2 -dock -e 'button2=;' -x '" ++ show horiz ++ "' -y 0 -h 40 -w 2823 -ta 'l' -fg '" ++ foreground ++ "' -bg '" ++ background ++ "' -fn '" ++ myFont ++ "'"
+myStatusBar sid horiz = iconsBar ++ trayer ++ infoBar
+  where
+    iconsBar = "~/.xmonad/status_bar '" ++ foreground ++ "' '" ++ background ++ "' '" ++ myFont ++ "' '" ++ show (horiz + 2823)
+    trayer = "' &trayer --edge top --align right --SetDockType true --SetPartialStrut true --expand false --width 150 --widthtype request --transparent true --tint '" ++ background ++ "' --alpha 0 --height 40 --monitor '" ++ show sid
+    infoBar = "' & dzen2 -dock -e 'button2=;' -x '" ++ show horiz ++ "' -y 0 -h 40 -w 2823 -ta 'l' -fg '" ++ foreground ++ "' -bg '" ++ background ++ "' -fn '" ++ myFont ++ "'"
 
 windowSpacing = 20
 
