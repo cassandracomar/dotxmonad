@@ -79,7 +79,7 @@ myStatusBar sid horiz = iconsBar ++ trayer ++ infoBar
   where
     iconsBar = "~/.xmonad/status_bar '" ++ foreground ++ "' '" ++ background ++ "' '" ++ myFont ++ "' '" ++ show (horiz + 2823)
     trayer = "' &trayer --edge top --align right --SetDockType true --SetPartialStrut true --expand false --width 150 --widthtype request --transparent true --tint '" ++ background ++ "' --alpha 0 --height 40 --monitor '" ++ show sid
-    infoBar = "' & dzen2 -dock -e 'button2=;' -x '" ++ show horiz ++ "' -y 0 -h 40 -w 2823 -ta 'l' -fg '" ++ foreground ++ "' -bg '" ++ background ++ "' -fn '" ++ myFont ++ "'"
+    infoBar = "' &dzen2 -dock -e 'button2=;' -x '" ++ show horiz ++ "' -y 0 -h 40 -w 2823 -ta 'l' -fg '" ++ foreground ++ "' -bg '" ++ background ++ "' -fn '" ++ myFont ++ "'"
 
 windowSpacing = 20
 
@@ -274,6 +274,7 @@ myManageHook =
       title =? "FILES" --> doRectFloat (W.RationalRect (1 / 4) (1 / 4) (1 / 2) (1 / 2)),
       title =? "Print" --> doRectFloat (W.RationalRect (1 / 4) (1 / 4) (1 / 2) (1 / 2)),
       title =? "IRC" --> doShift "III",
+      title =? "Signal" --> doShift "III",
       className =? "Gvim" --> doShift "I",
       className =? "firefox" --> doShift "II",
       className =? "Clementine" --> doShift "V",
@@ -281,9 +282,13 @@ myManageHook =
       className =? "VirtualBox" --> doShift "IX",
       className =? "Slack" --> doShift "III",
       className =? "Riot" --> doShift "III",
+      className =? "discord" --> doShift "III",
+      className =? "Signal" --> doShift "III",
       resource =? "desktop_window" --> doIgnore,
       resource =? "kdesktop" --> doIgnore,
       resource =? "steam" --> doIgnore,
+      resource =? "discord" --> doShift "III",
+      resource =? "signal" --> doShift "III",
       title =? "helm" --> doFloat,
       isFullscreen --> (doF W.focusDown <+> doFullFloat)
     ]

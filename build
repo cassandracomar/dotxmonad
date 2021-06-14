@@ -2,6 +2,6 @@
 BIN=$1
 [[ -n $BIN ]] || BIN=xmonad
 
-stack install --nix --local-bin-path $PWD
+stack install -j8 --nix --local-bin-path $PWD
 
 [[ -f $BIN ]] || ln -s xmonad $BIN
