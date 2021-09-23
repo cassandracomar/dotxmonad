@@ -69,7 +69,7 @@ myNormalBorderColor = "#3c2c1c"
 
 myFocusedBorderColor = "#eedece"
 
-myFont = "xft:Inconsolata for Powerline:Medium:size=9"
+myFont = "xft:Inconsolata-dz for Powerline:Medium:size=9"
 
 background = "#181512"
 
