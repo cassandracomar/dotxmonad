@@ -17,7 +17,7 @@
 #
 # resolver: ./custom-snapshot.yaml
 # resolver: https://example.com/snapshots/2018-01-01.yaml
-resolver: lts-17.9
+resolver: lts-18.14
 
 # User packages to be built.
 # Various formats can be used as shown in the example below.
@@ -40,10 +40,13 @@ packages:
 # (e.g., acme-missiles-0.3)
 # extra-deps: []
 extra-deps:
-  - xmonad-0.15
-  - xmonad-contrib-0.16
+  - xmonad-0.17.0
+  - xmonad-contrib-0.17.0
   - data-default-0.7.1.1
-  - X11-1.9.1
+  - X11-1.10.2
+
+ghc-options:
+  "$everything": -haddock
 
 # Override default flag values for local packages and extra-deps
 # flags: {}

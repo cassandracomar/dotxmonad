@@ -5,19 +5,19 @@
 
 packages:
 - completed:
-    hackage: xmonad-0.15@sha256:db671d78ecd66f39f23decf60974a3e078525ec9d2be68a3946b0cfb4d3954fa,5255
+    hackage: xmonad-0.17.0@sha256:fc90c8fa647390c68c902912a5a7417f04025dfe72f7de51b248217f7ca0d484,5533
     pantry-tree:
-      size: 2474
-      sha256: 0e5b141def9130877fa03c85900df2e2ea00f3513e9c0d39ef3b3ba1f6dc20ad
+      size: 2485
+      sha256: 6fd7c6a64621a088fcbb2e5a66030a78b0832d7341e4c465d3aeb4e668d097a5
   original:
-    hackage: xmonad-0.15
+    hackage: xmonad-0.17.0
 - completed:
-    hackage: xmonad-contrib-0.16@sha256:a47da91613dc8e04c040424ab605acb2e8693bcf76e397f924b39af89b954da1,15927
+    hackage: xmonad-contrib-0.17.0@sha256:defd04a9ca0e031eb7280b734ccd6d6b73f757babfe4a561a7ff718e75211749,20357
     pantry-tree:
-      size: 19578
-      sha256: 934bc533bb08aebb72e51cb0fa5aab9e27e5c6c25a0a1edaa2c76058f8771167
+      size: 21783
+      sha256: 81a4589ef85fed434a852ba1324466b5ad8f4fd752cd88840aa4ea4348a16cec
   original:
-    hackage: xmonad-contrib-0.16
+    hackage: xmonad-contrib-0.17.0
 - completed:
     hackage: data-default-0.7.1.1@sha256:2804e8d14f521a1edee88b68b66347448e7f3b685868290fdc55930e4471f5a9,645
     pantry-tree:
@@ -26,15 +26,15 @@ packages:
   original:
     hackage: data-default-0.7.1.1
 - completed:
-    hackage: X11-1.9.1@sha256:d20ea83ff2f040675b15a5d9dded1791fdb02bd7a6cb4eda22b65f3c245357b9,3474
+    hackage: X11-1.10.2@sha256:5f449203afe0240ca5124dc4b28d906fbde1d56a15c0c95534f677060f8b72ac,3747
     pantry-tree:
-      size: 2761
-      sha256: 36a3745458d44597f877ff29a4a031b96517cef0f2437d72caec68caf9e87dc5
+      size: 2861
+      sha256: b0cd22d02719a0b53da816a292eb599b9a5ab28fd4b71509332e2840e4f75277
   original:
-    hackage: X11-1.9.1
+    hackage: X11-1.10.2
 snapshots:
 - completed:
-    size: 567037
-    url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/lts/17/9.yaml
-    sha256: d7d8d5106e53d1669964bd8bd2b0f88a5ad192d772f5376384b76738fd992311
-  original: lts-17.9
+    size: 586069
+    url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/lts/18/14.yaml
+    sha256: 87842ecbaa8ca9cee59a7e6be52369dbed82ed075cb4e0d152614a627e8fd488
+  original: lts-18.14

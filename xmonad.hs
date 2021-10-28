@@ -16,13 +16,15 @@ import XMonad hiding (Connection, (|||))
 import XMonad.Actions.Navigation2D
 import XMonad.Actions.PhysicalScreens
 import XMonad.Config.Xfce
-import XMonad.Hooks.DynamicBars
 import XMonad.Hooks.DynamicLog
+import XMonad.Hooks.EwmhDesktops
 import XMonad.Hooks.FadeInactive
 import XMonad.Hooks.InsertPosition
 import XMonad.Hooks.ManageDocks
 import XMonad.Hooks.ManageHelpers
 import XMonad.Hooks.SetWMName
+import XMonad.Hooks.StatusBar
+import XMonad.Hooks.StatusBar.PP
 import XMonad.Layout.IM
 import XMonad.Layout.LayoutCombinators
 import XMonad.Layout.LayoutScreens
@@ -75,15 +77,15 @@ background = "#181512"
 
 foreground = "#D6C3B6"
 
-myStatusBar sid horiz = iconsBar ++ trayer ++ infoBar
+myStatusBars sid horiz = do
+  infoBarSB <- statusBarPipe infoBar (return prettyPrinter)
+  return $ statusBarGeneric iconsBar mempty <> statusBarGeneric trayer mempty <> infoBarSB
   where
-    iconsBar = "~/.xmonad/status_bar '" ++ foreground ++ "' '" ++ background ++ "' '" ++ myFont ++ "' '" ++ show (horiz + 2823)
-    trayer = "' &trayer --edge top --align right --SetDockType true --SetPartialStrut true --expand false --width 150 --widthtype request --transparent true --tint '" ++ background ++ "' --alpha 0 --height 40 --monitor '" ++ show sid
-    infoBar = "' &dzen2 -dock -e 'button2=;' -x '" ++ show horiz ++ "' -y 0 -h 40 -w 2823 -ta 'l' -fg '" ++ foreground ++ "' -bg '" ++ background ++ "' -fn '" ++ myFont ++ "'"
+    iconsBar = "~/.xmonad/status_bar '" ++ foreground ++ "' '" ++ background ++ "' '" ++ myFont ++ "' '" ++ show (horiz + 2823) ++ "'"
+    trayer = "trayer --edge top --align right --SetDockType true --SetPartialStrut true --expand false --width 150 --widthtype request --transparent true --tint '" ++ background ++ "' --alpha 0 --height 40 --monitor '" ++ show sid ++ "'"
+    infoBar = "dzen2 -dock -e 'button2=;' -x '" ++ show horiz ++ "' -y 0 -h 40 -w 2823 -ta 'l' -fg '" ++ foreground ++ "' -bg '" ++ background ++ "' -fn '" ++ myFont ++ "'"
 
 windowSpacing = 20
-
-fixMonitor = "~/.files/monitor-hotplug.sh"
 
 ------------------------------------------------------------------------
 -- Key bindings. Add, modify or remove key bindings here.
@@ -94,7 +96,7 @@ myKeys conf@XConfig {XMonad.modMask = modMask} =
     [ ((modMask .|. shiftMask, xK_Return), spawn $ XMonad.terminal conf),
       ((modMask .|. controlMask, xK_l), spawn "xscreensaver-command -lock"),
       -- launch dmenu
-      ((modMask, xK_p), spawn "CMD=$(yeganesh -x); dunstify $CMD; PATH=~/.local/bin/:$PATH $CMD"),
+      ((modMask, xK_p), spawn "CMD=$(yeganesh -x); dunstify $CMD; PATH=~/.local/bin/:$PATH nohup $CMD &"),
       -- suspend the computer
       ((modMask, xK_s), spawn "sudo systemctl suspend"),
       -- close focused window
@@ -334,24 +336,15 @@ fixLayoutName s = s
 --
 -- > logHook = dynamicLogDzen
 --
-statusBars :: ScreenId -> IO Handle
+statusBars :: ScreenId -> IO StatusBarConfig
 statusBars sid' = do
   let sid = fromInteger $ toInteger sid'
   dpy <- openDisplay ""
   rects <- getScreenInfo dpy
   let x0 = rect_x $ rects !! sid
 
-  handle <- spawnPipe $ myStatusBar sid' x0
   closeDisplay dpy
-  return handle
-
-myLogHook :: X ()
-myLogHook = multiPP prettyPrinter prettyPrinter
-
-myCleanUpHook :: IO ()
-myCleanUpHook = return () --spawn "pkill dzen2"
-
-myEventHook = dynStatusBarEventHook statusBars myCleanUpHook
+  myStatusBars sid' x0
 
 ------------------------------------------------------------------------
 -- Startup hook
@@ -361,25 +354,15 @@ myEventHook = dynStatusBarEventHook statusBars myCleanUpHook
 -- per-workspace layout choices.
 --
 -- By default, do nothing.
-myStartupHook = do
-  spawn fixMonitor
-  setWMName "LG3D"
-  dynStatusBarStartup statusBars myCleanUpHook
+myStartupHook = setWMName "LG3D"
 
 ------------------------------------------------------------------------
 -- Now run xmonad with all the defaults we set up.
 
 -- Run xmonad with the settings you specify. No need to modify this.
 
-main :: IO ()
-main = xmonad myXMConfig
-
--- A structure containing your configuration settings, overriding
--- fields in the default config. Any you don't override, will
--- use the defaults defined in xmonad/XMonad/Config.hs
---
-myXMConfig =
-  docks $
+main =
+  xmonad . ewmh . dynamicEasySBs statusBars $
     xfceConfig
       { -- simple stuff
         terminal = myTerminal,
@@ -393,11 +376,10 @@ myXMConfig =
         keys = myKeys,
         mouseBindings = myMouseBindings,
         -- hooks, layouts
-        layoutHook = avoidStruts . smartBorders $ myLayout,
+        layoutHook = smartBorders myLayout,
         manageHook = manageDocks <+> insertPosition Above Newer <+> myManageHook,
-        startupHook = docksStartupHook >> myStartupHook,
-        handleEventHook = docksEventHook >> myEventHook,
-        logHook = myLogHook >> fadeInactiveLogHook 0xdddddddd
+        startupHook = myStartupHook,
+        logHook = fadeInactiveLogHook 0xdddddddd
       }
       `additionalKeysP` [ ("<XF86MonBrightnessDown>", spawn "~/.files/backlight-adj.sh down"),
                           ("<XF86MonBrightnessUp>", spawn "~/.files/backlight-adj.sh up"),
