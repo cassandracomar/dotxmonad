@@ -3,4 +3,5 @@ xmonad.errors
 xmonad.hi
 xmonad-x86_64-linux
 xmonad.state
+xmonad
 *.o

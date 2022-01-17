@@ -2,6 +2,7 @@
 BIN=$1
 [[ -n $BIN ]] || BIN=xmonad
 
-stack install -j8 --nix --local-bin-path $PWD
+STORE_PATH=$(nix build . --no-link --json | jq -rM '.[] | .outputs.out')
 
-[[ -f $BIN ]] || ln -s xmonad $BIN
+[[ -f $BIN ]] && rm -f $BIN
+ln -s $STORE_PATH/bin/xmonad $BIN
