@@ -4,5 +4,5 @@ BIN=$1
 
 STORE_PATH=$(nix build . --no-link --json | jq -rM '.[] | .outputs.out')
 
-[[ -f $BIN ]] && rm -f $BIN
+rm -f $BIN
 ln -s $STORE_PATH/bin/xmonad $BIN
