@@ -6,3 +6,4 @@ xmonad.state
 xmonad
 *.o
 result
+.direnv
