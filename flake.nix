@@ -19,6 +19,11 @@
               shell.tools = { cabal = { }; };
               # Non-Haskell shell tools go here
               shell.buildInputs = with pkgs; [ nixpkgs-fmt ];
+              modules = [{
+                # Replace `extra-libraries` dependencies
+                packages.X11.components.library.libs = pkgs.lib.mkForce (with pkgs.xorg;
+                  [ libX11 libXrandr libXext libXScrnSaver libXinerama ]);
+              }];
             };
           })
         ];
@@ -27,7 +32,8 @@
           inherit (haskellNix) config;
         };
         flake = pkgs.xmonad-personal.flake { };
-      in flake // {
+      in
+      flake // {
         packages = flake.packages;
         # Built by `nix build .`
         defaultPackage = flake.packages."xmonad-personal:exe:xmonad";
