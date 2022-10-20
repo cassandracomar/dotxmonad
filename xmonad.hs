@@ -41,7 +41,7 @@ import XMonad.Util.Run
 -- The preferred terminal program, which is used in a binding below and by
 -- certain contrib modules.
 --
-myTerminal = "emacsclient -c -e '(aweshell-new)'"
+myTerminal = "emacsclient -c -e '(shell-new)'"
 
 -- Width of the window border in pixels.
 --
