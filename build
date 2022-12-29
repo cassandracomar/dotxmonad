@@ -2,7 +2,7 @@
 BIN=$1
 [[ -n $BIN ]] || BIN=xmonad
 
-STORE_PATH=$(nix --refresh build --no-write-lock-file github:cassandracomar/nix-config#xmonad-personal --no-link --json | jq -rM '.[] | .outputs.out')
+STORE_PATH=$(nix build --no-write-lock-file . --no-link --json | jq -rM '.[] | .outputs.out')
 
 rm -f $BIN
 ln -s $STORE_PATH/bin/xmonad $BIN

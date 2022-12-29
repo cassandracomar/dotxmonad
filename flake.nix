@@ -1,41 +1,39 @@
 {
-  description = "xmonad personal configuration";
-  inputs.haskellNix.url = "github:input-output-hk/haskell.nix";
-  inputs.nixpkgs.follows = "haskellNix/nixpkgs-unstable";
-  # inputs.nixpkgs.url = "nixpkgs/nixpkgs-unstable";
+  description = "xmonad-personal";
+
+  inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
   inputs.flake-utils.url = "github:numtide/flake-utils";
-  outputs = { self, nixpkgs, flake-utils, haskellNix }:
-    flake-utils.lib.eachSystem [ "x86_64-linux" "x86_64-darwin" ] (system:
-      let
-        overlays = [
-          haskellNix.overlay
-          (final: prev: {
-            # This overlay adds our project to pkgs
-            xmonad-personal = final.haskell-nix.project' {
-              src = ./.;
-              compiler-nix-name = "ghc924";
-              # This is used by `nix develop .` to open a shell for use with
-              # `cabal`, `hlint` and `haskell-language-server`
-              shell.tools = { cabal = { }; };
-              # Non-Haskell shell tools go here
-              shell.buildInputs = with pkgs; [ nixpkgs-fmt ];
-              modules = [{
-                # Replace `extra-libraries` dependencies
-                packages.X11.components.library.libs = pkgs.lib.mkForce (with pkgs.xorg;
-                  [ libX11 libXrandr libXext libXScrnSaver libXinerama ]);
-              }];
+
+  outputs = inputs:
+    let
+      overlay = final: prev: {
+        haskell = prev.haskell // {
+          packageOverrides = hfinal: hprev:
+            prev.haskell.packageOverrides hfinal hprev // {
+              xmonad-personal = hfinal.callCabal2nix "xmonad-personal" ./. { };
             };
-          })
-        ];
-        pkgs = import nixpkgs {
-          inherit system overlays;
-          inherit (haskellNix) config;
         };
-        flake = pkgs.xmonad-personal.flake { };
-      in
-      flake // {
-        packages = flake.packages;
-        # Built by `nix build .`
-        defaultPackage = flake.packages."xmonad-personal:exe:xmonad";
-      });
+        xmonad-personal = final.haskell.lib.compose.justStaticExecutables final.haskellPackages.xmonad-personal;
+      };
+      perSystem = system:
+        let
+          pkgs = import inputs.nixpkgs { inherit system; overlays = [ overlay ]; };
+          hspkgs = pkgs.haskell.packages.ghc92;
+        in
+        {
+          devShell = hspkgs.shellFor {
+            withHoogle = true;
+            packages = p: [ p.xmonad-personal ];
+            buildInputs = [
+              hspkgs.cabal-install
+              hspkgs.haskell-language-server
+              hspkgs.hlint
+              hspkgs.ormolu
+              pkgs.bashInteractive
+            ];
+          };
+          defaultPackage = pkgs.xmonad-personal;
+        };
+    in
+    { inherit overlay; } // inputs.flake-utils.lib.eachDefaultSystem perSystem;
 }

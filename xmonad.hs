@@ -96,7 +96,7 @@ myKeys conf@XConfig {XMonad.modMask = modMask} =
     [ ((modMask .|. shiftMask, xK_Return), spawn $ XMonad.terminal conf),
       ((modMask .|. controlMask, xK_l), spawn "xscreensaver-command -lock"),
       -- launch dmenu
-      ((modMask, xK_p), spawn "CMD=$(yeganesh -x); dunstify $CMD; PATH=~/.local/bin/:$PATH nohup $CMD &"),
+      ((modMask, xK_p), spawn "CMD=$(/etc/profiles/per-user/cassandra/bin/yeganesh -x); dunstify $CMD; PATH=~/.local/bin/:$PATH nohup $CMD &"),
       -- suspend the computer
       ((modMask, xK_s), spawn "sudo systemctl suspend"),
       -- close focused window
