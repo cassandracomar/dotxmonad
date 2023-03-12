@@ -41,7 +41,7 @@ import XMonad.Util.Run
 -- The preferred terminal program, which is used in a binding below and by
 -- certain contrib modules.
 --
-myTerminal = "emacsclient -c -e '(shell-new)'"
+myTerminal = "emacsclient -c -e '(aweshell-new)'"
 
 -- Width of the window border in pixels.
 --
@@ -77,13 +77,13 @@ background = "#181512"
 
 foreground = "#D6C3B6"
 
-myStatusBars sid horiz = do
+myStatusBars sid horiz vert = do
   infoBarSB <- statusBarPipe infoBar (return prettyPrinter)
   return $ statusBarGeneric iconsBar mempty <> statusBarGeneric trayer mempty <> infoBarSB
   where
-    iconsBar = "~/.xmonad/status_bar '" ++ foreground ++ "' '" ++ background ++ "' '" ++ myFont ++ "' '" ++ show (horiz + 2823) ++ "'"
+    iconsBar = "~/.xmonad/status_bar '" ++ foreground ++ "' '" ++ background ++ "' '" ++ myFont ++ "' '" ++ show (horiz + 2823) ++ "' '" ++ show vert ++ "'"
     trayer = "trayer --edge top --align right --SetDockType true --SetPartialStrut true --expand false --width 150 --widthtype request --transparent true --tint '" ++ background ++ "' --alpha 0 --height 40 --monitor '" ++ show sid ++ "'"
-    infoBar = "dzen2 -dock -e 'button2=;' -x '" ++ show horiz ++ "' -y 0 -h 40 -w 2823 -ta 'l' -fg '" ++ foreground ++ "' -bg '" ++ background ++ "' -fn '" ++ myFont ++ "'"
+    infoBar = "dzen2 -dock -e 'button2=;' -x '" ++ show horiz ++ "' -y '" ++ show vert ++ "' -h 40 -w 2823 -ta 'l' -fg '" ++ foreground ++ "' -bg '" ++ background ++ "' -fn '" ++ myFont ++ "'"
 
 windowSpacing = 20
 
@@ -98,7 +98,7 @@ myKeys conf@XConfig {XMonad.modMask = modMask} =
       -- launch dmenu
       ((modMask, xK_p), spawn "CMD=$(/etc/profiles/per-user/cassandra/bin/yeganesh -x); dunstify $CMD; PATH=~/.local/bin/:$PATH nohup $CMD &"),
       -- suspend the computer
-      ((modMask, xK_s), spawn "sudo systemctl suspend"),
+      ((modMask, xK_g), spawn "sudo systemctl suspend"),
       -- close focused window
       ((modMask .|. shiftMask, xK_c), kill),
       -- Rotate through the available layout algorithms
@@ -150,7 +150,6 @@ myKeys conf@XConfig {XMonad.modMask = modMask} =
       ((mod4Mask, xK_Return), spawn "/home/cassandra/.files/music"),
       ((mod4Mask, xK_b), spawn "/home/cassandra/.files/launch-dwb"),
       ((modMask, xK_m), spawn "mpdmenu"),
-      ((mod4Mask, xK_f), spawn "sakura -t 'FILES' -x '/usr/bin/env ranger'"),
       ((mod4Mask, xK_i), spawn "sakura -t 'IRC' -x '/home/cassandra/.files/connect-irssi'"),
       -- Quit xmonad
       ((modMask .|. shiftMask, xK_q), io exitSuccess),
@@ -168,28 +167,24 @@ myKeys conf@XConfig {XMonad.modMask = modMask} =
       ]
       ++
       --
-      -- mod-{w,e,r}, Switch to physical/Xinerama screens 1, 2, or 3
-      -- mod-shift-{w,e,r}, Move client to screen 1, 2, or 3
+      -- mod-{w,e,r,s,d,f}, Switch to physical/Xinerama screens 1, 2, 3, 4, 5, or 6
+      -- mod-shift-{w,e,r,s,d,f}, Move client to screen 1, 2, 3, 4, 5, or 6
       --
       [ ((mask .|. modMask, key), f sc)
-        | (key, sc) <- zip [xK_w, xK_e, xK_r] [0 ..],
+        | (key, sc) <- zip [xK_w, xK_e, xK_r, xK_s, xK_d, xK_f] [0 ..],
           (f, mask) <- [(viewScreen def, 0), (sendToScreen def, shiftMask)]
       ]
-
---    [((m .|. modMask, key), screenWorkspace sc >>= flip whenJust (windows . f))
---        | (key, sc) <- zip [ xK_r, xK_w, xK_e ] [0..]
---        , (f, m) <- [(W.view, 0), (W.shift, shiftMask)]]
 
 ------------------------------------------------------------------------
 -- Mouse bindings: default actions bound to mouse events
 --
 myMouseBindings XConfig {XMonad.modMask = modMask} =
   M.fromList
-    -- mod-button1, Set the window to floating mode and move by dragging
+    -- alt-left click, Set the window to floating mode and move by dragging
     [ ((modMask, button1), \w -> focus w >> mouseMoveWindow w),
-      -- mod-button2, Raise the window to the top of the stack
+      -- alt-middle click, Raise the window to the top of the stack
       ((modMask, button2), \w -> focus w >> windows W.swapMaster),
-      -- mod-button3, Set the window to floating mode and resize by dragging
+      -- alt-right click, Set the window to floating mode and resize by dragging
       ((modMask, button3), \w -> focus w >> mouseResizeWindow w)
       -- you may also bind events to the mouse scroll wheel (button4 and button5)
     ]
@@ -342,9 +337,10 @@ statusBars sid' = do
   dpy <- openDisplay ""
   rects <- getScreenInfo dpy
   let x0 = rect_x $ rects !! sid
+  let y0 = rect_y $ rects !! sid
 
   closeDisplay dpy
-  myStatusBars sid' x0
+  myStatusBars sid' x0 y0
 
 ------------------------------------------------------------------------
 -- Startup hook
@@ -376,7 +372,7 @@ main =
         keys = myKeys,
         mouseBindings = myMouseBindings,
         -- hooks, layouts
-        layoutHook = smartBorders myLayout,
+        layoutHook = avoidStruts $ smartBorders myLayout,
         manageHook = manageDocks <+> insertPosition Above Newer <+> myManageHook,
         startupHook = myStartupHook,
         logHook = fadeInactiveLogHook 0xdddddddd
